@@ -17,9 +17,7 @@ class FSBOServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        Route::middleware(['web', 'admin_locale', 'user'])
-            ->prefix(config('app.admin_path'))
-            ->group(__DIR__ . '/../Routes/web.php');
+        $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
 
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'fsbo');
     }
