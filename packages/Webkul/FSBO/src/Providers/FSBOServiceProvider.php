@@ -4,6 +4,7 @@ namespace Webkul\FSBO\Providers;
 
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class FSBOServiceProvider extends ServiceProvider
 {
@@ -16,7 +17,11 @@ class FSBOServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        $this->loadViewsFrom(__DIR__.'/../Resources/views', 'fsbo');
+        Route::middleware(['web', 'admin_locale', 'user'])
+            ->prefix(config('app.admin_path'))
+            ->group(__DIR__ . '/../Routes/web.php');
+
+        $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'fsbo');
     }
 
     /**
