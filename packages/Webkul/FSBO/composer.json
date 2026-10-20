@@ -1,0 +1,22 @@
+{
+    "name": "krayin/laravel-fsbo",
+    "license": "MIT",
+    "require": {
+        "krayin/laravel-core": "^1.0",
+        "krayin/laravel-user": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\FSBO\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\FSBO\\Providers\\FSBOServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}
