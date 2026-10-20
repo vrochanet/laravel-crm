@@ -79,7 +79,7 @@ return [
     |
      */
 
-    'timezone' => env('APP_TIMEZONE', 'Asia/Kolkata'),
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------
@@ -92,7 +92,7 @@ return [
     |
      */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'pt_PT'),
 
     /*
     |--------------------------------------------------------------------------
@@ -111,7 +111,8 @@ return [
         'fa' => 'Persian',
         'ja' => '日本語',
         'ko' => '한국어',
-        'pt_BR' => 'Portuguese',
+        'pt_BR' => 'Portuguese Brazil',
+        'pt_PT' => 'Portuguese Portugal',
         'tr' => 'Türkçe',
         'vi' => 'Vietnamese',
         'zh_CN' => '简体中文',
