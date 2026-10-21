@@ -2,32 +2,37 @@
 
 namespace Webkul\FSBO\Providers;
 
-use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Route;
 
 class FSBOServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap services.
-     *
-     * @return void
      */
-    public function boot(Router $router)
+    public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
 
-        $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
 
-        $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'fsbo');
+        $this->loadViewsFrom(__DIR__.'/../Resources/views', 'fsbo');
     }
 
     /**
      * Register services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
+        $this->registerConfig();
+    }
+
+    /**
+     * Register package configuration.
+     */
+    protected function registerConfig(): void
+    {
+        $this->mergeConfigFrom(dirname(__DIR__).'/Config/menu.php', 'menu.admin');
+
+        $this->mergeConfigFrom(dirname(__DIR__).'/Config/acl.php', 'acl');
     }
 }

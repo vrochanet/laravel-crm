@@ -8,6 +8,15 @@ use Webkul\FSBO\Services\FSBOLeadService;
 
 class FSBOController extends Controller
 {
+    public function index()
+    {
+        $properties = \Webkul\FSBO\Models\Property::with(['person', 'lead'])
+            ->latest()
+            ->paginate(15);
+
+        return view('fsbo::index', compact('properties'));
+    }
+
     public function create()
     {
         return view('fsbo::create');

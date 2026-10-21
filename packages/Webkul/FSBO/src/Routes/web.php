@@ -7,7 +7,7 @@ Route::middleware(['web', 'admin_locale', 'user'])
     ->prefix(config('app.admin_path'))
     ->controller(FSBOController::class)
     ->group(function () {
+        Route::get('fsbo', 'index')->name('admin.fsbo.index');
         Route::get('fsbo/create', 'create')->name('admin.fsbo.create');
-
         Route::post('fsbo', 'store')->name('admin.fsbo.store');
     });
