@@ -1,4 +1,3 @@
-
 <x-admin::layouts>
     <x-slot:title>
         Imóveis FSBO
@@ -10,10 +9,7 @@
                 Imóveis FSBO
             </p>
 
-            <a
-                href="{{ route('admin.fsbo.create') }}"
-                class="primary-button"
-            >
+            <a href="{{ route('admin.fsbo.create') }}" class="primary-button">
                 Novo contacto FSBO
             </a>
         </div>
@@ -43,7 +39,10 @@
                             </td>
 
                             <td class="px-4 py-3">
-                                {{ $property->property_type ?? '—' }}
+                                <a href="{{ route('admin.fsbo.show', $property->id) }}"
+                                    class="text-blue-600 hover:underline">
+                                    {{ $property->property_type ?? 'Imóvel' }}
+                                </a>
                             </td>
 
                             <td class="px-4 py-3">
@@ -51,19 +50,13 @@
                             </td>
 
                             <td class="px-4 py-3">
-                                {{ $property->asking_price !== null
-                                    ? number_format((float) $property->asking_price, 0, ',', '.') . ' €'
-                                    : '—' }}
+                                {{ $property->asking_price !== null ? number_format((float) $property->asking_price, 0, ',', '.') . ' €' : '—' }}
                             </td>
 
                             <td class="px-4 py-3">
                                 @if ($property->listing_url)
-                                    <a
-                                        href="{{ $property->listing_url }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="text-blue-600 hover:underline"
-                                    >
+                                    <a href="{{ $property->listing_url }}" target="_blank" rel="noopener noreferrer"
+                                        class="text-blue-600 hover:underline">
                                         Ver anúncio
                                     </a>
                                 @else
