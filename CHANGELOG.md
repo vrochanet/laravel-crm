@@ -2,13 +2,37 @@
 
 This changelog consists of the bug & security fixes and new features being included in the releases listed below.
 
-## **v2.2.7 (Upcoming)**
+## v2.2.7 (Upcoming)
 
-* [enhancement] Redesigned FSBO Imóveis and Modelos de comunicação index pages to match the Krayin admin visual style — sticky breadcrumb header bar, DataGrid-style row layout with avatar, brand-colour links, icon action buttons, and badge-style status indicators.
+- [enhancement] Redesigned FSBO Imóveis and Modelos de comunicação index pages to match the Krayin admin visual style — sticky breadcrumb header bar, DataGrid-style row layout with avatar, brand-colour links, icon action buttons, and badge-style status indicators.
+- [feature] Added FSBO communication templates with variable parsing, static contact log history, template CRUD, and prepare-before-send flow on the property page.
 
-* [feature] Added FSBO communication templates with variable parsing, static contact log history, template CRUD, and prepare-before-send flow on the property page.
+## v2.2.7 (16th of Oct 2026)
+
+- [fixed] Fixed a web form submission creating a duplicate contact when the address differed only in case.
+- [fixed] Fixed an empty web form submission answering with a server error.
+- [feature] Added quotes to Quick Add.
+- [fixed] Fixed creating a quote without line items failing with `Undefined array key "items"`.
+- [fixed] Fixed the leads settings control moving when switching between the kanban and table views.
+- [feature] Added notifications.
+- [feature] Update data filter at dashboard.
+- [feature] Mega Search Will open into modal.
+- [feature] Added a per-section record count to the mega search.
+- [fixed] Fixed the lookup field's search field.
+- [fixed] Fixed saving a contact with the phone left blank answering with a server error.
+- [fixed] Fixed picking a lead on a quote leaving the quote unsaveable and unlinked from that lead.
+- [fixed] Fixed picking a lead on a quote replacing the existing items instead of adding to them.
+- [fixed] Fixed a lead's page erroring when its contact had no phone number.
+- [fixed] Fixed removing a quote from a lead failing with no such lead.
+- [fixed] Fixed a lead and its quote not holding the same products.
+- [fixed] Fixed opening a mail outside drafts erroring under any locale but English.
+- [fixed] Added the missing Spanish and Brazilian Portuguese translations.
+- [fixed] Fixed the language file test passing while a translation was missing.
+- [security] Improved in Security.
 
 ## **v2.2.6 (10th of Sept 2026)**
+
+* [security] Improved in Security.
 
 * [feature] Added MariaDB support.
 
@@ -37,6 +61,10 @@ This changelog consists of the bug & security fixes and new features being inclu
 * [fixed] Added the missing Chinese translations for the users grid's associated group column.
 
 * [fixed] Fixed flaky admin end-to-end tests around organization owner lookup, lead creation and rich-text comment fields.
+
+* [fixed] Fixed creating or updating a lead failing with a server error (HTTP 500) when a product row was submitted without a `product_id`. The request is now rejected with a validation error.
+
+* [fixed] Fixed the expected close date of a lead being cleared when its stage was changed (Kanban drag and drop, the stage bar, won/lost) or another field was edited inline from the lead view.
 
 * [security] Fixed user and role listings not being scoped by the acting user's data scope, which allowed users to see records outside their own group. Roles now track their creator via a new `created_by` column.
 

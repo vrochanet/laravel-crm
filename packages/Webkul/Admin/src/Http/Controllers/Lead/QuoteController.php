@@ -53,21 +53,26 @@ class QuoteController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $leadId
-     * @param  int  $tagId
+     * @param  int  $quoteId
      * @return Response
      */
-    public function delete($leadId)
+    public function delete($quoteId)
     {
-        $lead = $this->leadRepository->findOrFail($leadId);
+        $quote = $this->quoteRepository->findOrFail($quoteId);
 
-        $this->preventUnauthorizedAccess($lead->user_id);
+        $leads = $quote->leads;
 
-        Event::dispatch('leads.quote.delete.before', $leadId);
+        $this->preventUnauthorizedAccess(
+            $leads->pluck('user_id')->push($quote->user_id)->filter()->unique()->all()
+        );
 
-        $lead->quotes()->detach(request('quote_id'));
+        Event::dispatch('leads.quote.delete.before', $quoteId);
 
-        Event::dispatch('leads.quote.delete.after', $lead);
+        foreach ($leads as $lead) {
+            $lead->quotes()->detach($quote->id);
+        }
+
+        Event::dispatch('leads.quote.delete.after', $leads->first());
 
         return response()->json([
             'message' => trans('admin::app.leads.view.quotes.destroy-success'),

@@ -34,6 +34,8 @@ import {
  *   individualUser  -> view_permission = individual  -> sees only their own
  */
 test.describe.serial("view permission data scoping", () => {
+    test.describe.configure({ timeout: 120 * 1000 });
+
     const suffix = runSuffix();
 
     /**
@@ -84,6 +86,19 @@ test.describe.serial("view permission data scoping", () => {
     let individualSession: Session | undefined;
 
     test.beforeAll(async ({ browser, baseURL }) => {
+        /**
+         * Provisioning the whole fixture — users, roles, groups and the records they own — is many
+         * actions, not one, so it gets its own budget rather than the per-test timeout. Without
+         * this the suite fails in setup, which reports nothing about the behaviour under test.
+         */
+        test.setTimeout(180 * 1000);
+
+        /**
+         * Every test in this suite checks a scope by running several grid searches in turn — each a
+         * navigation plus a filtered reload — so they legitimately take longer than the per-test
+         * default, which is sized for a single action.
+         */
+
         const admin = await signInExpectingSuccess(browser, baseURL, ADMIN_EMAIL, ADMIN_PASSWORD);
 
         try {
@@ -264,6 +279,82 @@ test.describe.serial("view permission data scoping", () => {
         const response = await getRoute(individualSession!, `admin/contacts/persons/view/${personId}`);
 
         expectDenied(response, "another owner's person fetched directly by id");
+    });
+
+    /**
+     * A record's activity timeline carries its notes and, for leads and people, the subject, body
+     * and recipients of its correspondence. It was built from the id in the url alone, so it
+     * answered for records the reader's own scope refuses — the record's page said no while the
+     * timeline behind it said yes.
+     */
+    test("another owner's activity timeline cannot be read by id", async () => {
+        const personId = await findRecordId(
+            globalSession!,
+            "admin/contacts/persons",
+            "person_name",
+            personOfGroupA
+        );
+
+        expect(
+            personId,
+            "the global user should be able to resolve another owner's person id"
+        ).not.toBeNull();
+
+        const timeline = await getRoute(
+            individualSession!,
+            `admin/contacts/persons/${personId}/activities?type=all`
+        );
+
+        expectDenied(timeline, "another owner's activity timeline fetched by id");
+    });
+
+    /**
+     * The page and its timeline have to agree: a refusal on one and a result on the other is the
+     * shape the gap took.
+     */
+    test("the timeline refuses whatever the record page refuses", async () => {
+        const personId = await findRecordId(
+            globalSession!,
+            "admin/contacts/persons",
+            "person_name",
+            personOfGroupA
+        );
+
+        const page = await getRoute(individualSession!, `admin/contacts/persons/view/${personId}`);
+
+        const timeline = await getRoute(
+            individualSession!,
+            `admin/contacts/persons/${personId}/activities`
+        );
+
+        expectDenied(page, "another owner's person page");
+
+        expectDenied(timeline, "the same person's activity timeline");
+    });
+
+    /**
+     * The owner still reaches their own timeline — a fix that refused everyone would pass the
+     * assertions above while breaking the feature.
+     */
+    test("a user reaches the timeline of a record they own", async () => {
+        const personId = await findRecordId(
+            individualSession!,
+            "admin/contacts/persons",
+            "person_name",
+            personOfIndividual
+        );
+
+        expect(
+            personId,
+            "the individual user should be able to resolve their own person id"
+        ).not.toBeNull();
+
+        const timeline = await getRoute(
+            individualSession!,
+            `admin/contacts/persons/${personId}/activities?type=all`
+        );
+
+        expectAllowed(timeline, "the timeline of a record the reader owns");
     });
 
     test("a scoped user cannot resolve another owner's record through the grid json", async () => {

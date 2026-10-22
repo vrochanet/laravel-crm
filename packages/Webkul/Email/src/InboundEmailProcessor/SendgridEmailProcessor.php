@@ -94,7 +94,12 @@ class SendgridEmailProcessor implements InboundEmailProcessor
         if (! isset($email)) {
             $email = $this->emailRepository->create(array_merge($headers, [
                 'folders' => ['inbox'],
-                'reply' => $reply,
+                /**
+                 * Filtered on the way in, as a threaded reply already is: the body arrives from
+                 * outside and the two branches store the same thing, so leaving one of them raw
+                 * made the record's safety depend on which branch happened to handle it.
+                 */
+                'reply' => $this->htmlFilter->process($reply, ''),
                 'unique_id' => time().'@'.config('mail.domain'),
                 'reference_ids' => [$headers['message_id']],
                 'user_type' => 'person',
@@ -105,6 +110,8 @@ class SendgridEmailProcessor implements InboundEmailProcessor
                 'attachments' => $this->emailParser->getAttachments(),
             ]);
         } else {
+            $email = $this->emailRepository->findThreadRoot($email);
+
             $parentEmail = $this->emailRepository->update([
                 'folders' => array_unique(array_merge($email->folders, ['inbox'])),
                 'reference_ids' => array_merge($email->reference_ids ?? [], [$headers['message_id']]),
