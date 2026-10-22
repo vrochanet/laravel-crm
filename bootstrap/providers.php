@@ -24,7 +24,7 @@ use Webkul\Tag\Providers\TagServiceProvider;
 use Webkul\User\Providers\UserServiceProvider;
 use Webkul\Warehouse\Providers\WarehouseServiceProvider;
 use Webkul\WebForm\Providers\WebFormServiceProvider;
-use Webkul\FSBO\Providers\FSBOServiceProvider;
+use Webkul\Prospeccao\Providers\ProspeccaoServiceProvider ;
 
 return [
     /*
@@ -62,6 +62,6 @@ return [
     UserServiceProvider::class,
     WarehouseServiceProvider::class,
     WebFormServiceProvider::class,
-    FSBOServiceProvider::class,
+    ProspeccaoServiceProvider::class,
 ];
 

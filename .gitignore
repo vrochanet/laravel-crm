@@ -35,3 +35,6 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 .phpunit.cache/
+
+# Backups locais do módulo Prospeção
+/packages/Webkul/Prospeccao/src/Resources/views_backup/

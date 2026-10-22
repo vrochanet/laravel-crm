@@ -29,7 +29,7 @@ Breadcrumbs::for('leads.edit', function (BreadcrumbTrail $trail, $lead) {
 // Dashboard > Leads > Title
 Breadcrumbs::for('leads.view', function (BreadcrumbTrail $trail, $lead) {
     $trail->parent('leads');
-    $trail->push('#'.$lead->id, route('admin.leads.view', $lead->id));
+    $trail->push('#' . $lead->id, route('admin.leads.view', $lead->id));
 });
 
 // Dashboard > Quotes
@@ -59,7 +59,7 @@ Breadcrumbs::for('mail', function (BreadcrumbTrail $trail) {
 // Mail > [Compose | Inbox | Outbox | Draft | Sent | Trash]
 Breadcrumbs::for('mail.route', function (BreadcrumbTrail $trail, $route) {
     $trail->parent('mail');
-    $trail->push(menu()->getLabel('mail.'.$route, 'admin::app.mail.index.'.$route), route('admin.mail.index', ['route' => $route]));
+    $trail->push(menu()->getLabel('mail.' . $route, 'admin::app.mail.index.' . $route), route('admin.mail.index', ['route' => $route]));
 });
 
 // Mail > [Inbox | Outbox | Draft | Sent | Trash] > Title
@@ -107,7 +107,7 @@ Breadcrumbs::for('contacts.persons.edit', function (BreadcrumbTrail $trail, $per
 // Dashboard > Contacts > Persons > View
 Breadcrumbs::for('contacts.persons.view', function (BreadcrumbTrail $trail, $person) {
     $trail->parent('contacts.persons');
-    $trail->push('#'.$person->id, route('admin.contacts.persons.index'));
+    $trail->push('#' . $person->id, route('admin.contacts.persons.index'));
 });
 
 // Dashboard > Contacts > Organizations
@@ -143,7 +143,7 @@ Breadcrumbs::for('products.create', function (BreadcrumbTrail $trail) {
 // Dashboard > Products > View Product
 Breadcrumbs::for('products.view', function (BreadcrumbTrail $trail, $product) {
     $trail->parent('products');
-    $trail->push('#'.$product->id, route('admin.products.view', $product->id));
+    $trail->push('#' . $product->id, route('admin.products.view', $product->id));
 });
 
 // Dashboard > Products > Edit Product
@@ -394,7 +394,7 @@ Breadcrumbs::for('settings.warehouses.edit', function (BreadcrumbTrail $trail, $
 // Dashboard > Settings > Warehouse > View Warehouse
 Breadcrumbs::for('settings.warehouses.view', function (BreadcrumbTrail $trail, $warehouse) {
     $trail->parent('settings.warehouses');
-    $trail->push('#'.$warehouse->id, route('admin.settings.warehouses.view', $warehouse->id));
+    $trail->push('#' . $warehouse->id, route('admin.settings.warehouses.view', $warehouse->id));
 });
 
 // Dashboard > Settings > Warehouse > View Warehouse > Products
@@ -445,52 +445,52 @@ Breadcrumbs::for('settings.data_transfers.import', function (BreadcrumbTrail $tr
     $trail->push(trans('admin::app.settings.data-transfer.imports.import.title'), route('admin.settings.data_transfer.imports.import', $import->id));
 });
 
-// FSBO
-Breadcrumbs::for('fsbo', function (BreadcrumbTrail $trail) {
+// Prospeção
+Breadcrumbs::for('prospeccao', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('FSBO', route('admin.fsbo.index'));
+    $trail->push('Prospeção', route('admin.prospeccao.index'));
 });
 
-// FSBO > Imóveis
-Breadcrumbs::for('fsbo.properties', function (BreadcrumbTrail $trail) {
-    $trail->parent('fsbo');
-    $trail->push('Imóveis FSBO', route('admin.fsbo.index'));
+// Prospeção > Imóveis
+Breadcrumbs::for('prospeccao.properties', function (BreadcrumbTrail $trail) {
+    $trail->parent('prospeccao');
+    $trail->push('Imóveis', route('admin.prospeccao.index'));
 });
 
-// FSBO > Imóveis > Novo
-Breadcrumbs::for('fsbo.properties.create', function (BreadcrumbTrail $trail) {
-    $trail->parent('fsbo.properties');
-    $trail->push('Novo contacto FSBO', route('admin.fsbo.create'));
+// Prospeção > Imóveis > Novo
+Breadcrumbs::for('prospeccao.properties.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('prospeccao.properties');
+    $trail->push('Novo imóvel', route('admin.prospeccao.create'));
 });
 
-// FSBO > Imóveis > Ver
-Breadcrumbs::for('fsbo.properties.show', function (BreadcrumbTrail $trail, $property) {
-    $trail->parent('fsbo.properties');
-    $trail->push('#'.$property->id, route('admin.fsbo.show', $property->id));
+// Prospeção > Imóveis > Ver
+Breadcrumbs::for('prospeccao.properties.show', function (BreadcrumbTrail $trail, $property) {
+    $trail->parent('prospeccao.properties');
+    $trail->push('#' . $property->id, route('admin.prospeccao.show', $property->id));
 });
 
-// FSBO > Imóveis > Editar
-Breadcrumbs::for('fsbo.properties.edit', function (BreadcrumbTrail $trail, $property) {
-    $trail->parent('fsbo.properties');
-    $trail->push('Editar', route('admin.fsbo.edit', $property->id));
+// Prospeção > Imóveis > Editar
+Breadcrumbs::for('prospeccao.properties.edit', function (BreadcrumbTrail $trail, $property) {
+    $trail->parent('prospeccao.properties');
+    $trail->push('Editar', route('admin.prospeccao.edit', $property->id));
 });
 
-// FSBO > Modelos de comunicação
-Breadcrumbs::for('fsbo.templates', function (BreadcrumbTrail $trail) {
-    $trail->parent('fsbo');
-    $trail->push('Modelos de comunicação', route('admin.fsbo.templates.index'));
+// Prospeção > Modelos de comunicação
+Breadcrumbs::for('prospeccao.templates', function (BreadcrumbTrail $trail) {
+    $trail->parent('prospeccao');
+    $trail->push('Modelos de comunicação', route('admin.prospeccao.templates.index'));
 });
 
-// FSBO > Modelos de comunicação > Novo
-Breadcrumbs::for('fsbo.templates.create', function (BreadcrumbTrail $trail) {
-    $trail->parent('fsbo.templates');
-    $trail->push('Novo modelo', route('admin.fsbo.templates.create'));
+// Prospeção > Modelos de comunicação > Novo
+Breadcrumbs::for('prospeccao.templates.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('prospeccao.templates');
+    $trail->push('Novo modelo', route('admin.prospeccao.templates.create'));
 });
 
-// FSBO > Modelos de comunicação > Editar
-Breadcrumbs::for('fsbo.templates.edit', function (BreadcrumbTrail $trail, $template) {
-    $trail->parent('fsbo.templates');
-    $trail->push('Editar', route('admin.fsbo.templates.edit', $template->id));
+// Prospeção > Modelos de comunicação > Editar
+Breadcrumbs::for('prospeccao.templates.edit', function (BreadcrumbTrail $trail, $template) {
+    $trail->parent('prospeccao.templates');
+    $trail->push('Editar', route('admin.prospeccao.templates.edit', $template->id));
 });
 
 // Configuration

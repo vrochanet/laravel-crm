@@ -84,7 +84,7 @@
             "Webkul\\Warehouse\\": "packages/Webkul/Warehouse/src",
             "Webkul\\WebForm\\": "packages/Webkul/WebForm/src",
             "Webkul\\Automation\\": "packages/Webkul/Automation/src",
-            "Webkul\\FSBO\\": "packages/Webkul/FSBO/src"
+            "Webkul\\Prospeccao\\": "packages/Webkul/Prospeccao/src"
         }
     },
     "autoload-dev": {
