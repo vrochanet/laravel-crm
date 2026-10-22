@@ -2,6 +2,12 @@
 
 This changelog consists of the bug & security fixes and new features being included in the releases listed below.
 
+## **v2.2.7 (Upcoming)**
+
+* [enhancement] Redesigned FSBO Imóveis and Modelos de comunicação index pages to match the Krayin admin visual style — sticky breadcrumb header bar, DataGrid-style row layout with avatar, brand-colour links, icon action buttons, and badge-style status indicators.
+
+* [feature] Added FSBO communication templates with variable parsing, static contact log history, template CRUD, and prepare-before-send flow on the property page.
+
 ## **v2.2.6 (10th of Sept 2026)**
 
 * [feature] Added MariaDB support.

@@ -2,14 +2,19 @@
 
 return [
     [
-        'key'   => 'fsbo',
-        'name'  => 'FSBO',
+        'key' => 'fsbo',
+        'name' => 'FSBO',
         'route' => 'admin.fsbo.index',
-        'sort'  => 1,
+        'sort' => 1,
     ], [
-        'key'   => 'fsbo.create',
-        'name'  => 'admin::app.acl.create',
+        'key' => 'fsbo.create',
+        'name' => 'admin::app.acl.create',
         'route' => ['admin.fsbo.create', 'admin.fsbo.store'],
-        'sort'  => 1,
+        'sort' => 1,
+    ], [
+        'key' => 'fsbo.templates',
+        'name' => 'Modelos de comunicação',
+        'route' => 'admin.fsbo.templates.index',
+        'sort' => 2,
     ],
 ];

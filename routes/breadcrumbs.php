@@ -445,6 +445,54 @@ Breadcrumbs::for('settings.data_transfers.import', function (BreadcrumbTrail $tr
     $trail->push(trans('admin::app.settings.data-transfer.imports.import.title'), route('admin.settings.data_transfer.imports.import', $import->id));
 });
 
+// FSBO
+Breadcrumbs::for('fsbo', function (BreadcrumbTrail $trail) {
+    $trail->parent('dashboard');
+    $trail->push('FSBO', route('admin.fsbo.index'));
+});
+
+// FSBO > Imóveis
+Breadcrumbs::for('fsbo.properties', function (BreadcrumbTrail $trail) {
+    $trail->parent('fsbo');
+    $trail->push('Imóveis FSBO', route('admin.fsbo.index'));
+});
+
+// FSBO > Imóveis > Novo
+Breadcrumbs::for('fsbo.properties.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('fsbo.properties');
+    $trail->push('Novo contacto FSBO', route('admin.fsbo.create'));
+});
+
+// FSBO > Imóveis > Ver
+Breadcrumbs::for('fsbo.properties.show', function (BreadcrumbTrail $trail, $property) {
+    $trail->parent('fsbo.properties');
+    $trail->push('#'.$property->id, route('admin.fsbo.show', $property->id));
+});
+
+// FSBO > Imóveis > Editar
+Breadcrumbs::for('fsbo.properties.edit', function (BreadcrumbTrail $trail, $property) {
+    $trail->parent('fsbo.properties');
+    $trail->push('Editar', route('admin.fsbo.edit', $property->id));
+});
+
+// FSBO > Modelos de comunicação
+Breadcrumbs::for('fsbo.templates', function (BreadcrumbTrail $trail) {
+    $trail->parent('fsbo');
+    $trail->push('Modelos de comunicação', route('admin.fsbo.templates.index'));
+});
+
+// FSBO > Modelos de comunicação > Novo
+Breadcrumbs::for('fsbo.templates.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('fsbo.templates');
+    $trail->push('Novo modelo', route('admin.fsbo.templates.create'));
+});
+
+// FSBO > Modelos de comunicação > Editar
+Breadcrumbs::for('fsbo.templates.edit', function (BreadcrumbTrail $trail, $template) {
+    $trail->parent('fsbo.templates');
+    $trail->push('Editar', route('admin.fsbo.templates.edit', $template->id));
+});
+
 // Configuration
 Breadcrumbs::for('configuration', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');

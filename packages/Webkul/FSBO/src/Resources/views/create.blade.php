@@ -1,11 +1,11 @@
-
 <x-admin::layouts>
     <x-slot:title>
         Novo Lead FSBO
     </x-slot>
 
     <div class="flex flex-col gap-4">
-        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
+        <div
+            class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
             <h1 class="text-xl font-bold text-gray-800 dark:text-white">
                 Novo Lead FSBO
             </h1>
@@ -31,11 +31,7 @@
             </div>
         @endif
 
-        <x-admin::form
-            id="fsbo-form"
-            method="POST"
-            :action="route('admin.fsbo.store')"
-        >
+        <x-admin::form id="fsbo-form" method="POST" :action="route('admin.fsbo.store')">
             <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <div class="mb-4">
                     <h2 class="text-base font-semibold text-gray-800 dark:text-white">
@@ -52,14 +48,8 @@
                             Nome do proprietário
                         </x-admin::form.control-group.label>
 
-                        <x-admin::form.control-group.control
-                            type="text"
-                            id="owner_name"
-                            name="owner_name"
-                            rules="required"
-                            :value="old('owner_name')"
-                            placeholder="Nome completo"
-                        />
+                        <x-admin::form.control-group.control type="text" id="owner_name" name="owner_name"
+                            rules="required" :value="old('owner_name')" placeholder="Nome completo" />
 
                         <x-admin::form.control-group.error control-name="owner_name" />
                     </x-admin::form.control-group>
@@ -69,16 +59,21 @@
                             Telefone
                         </x-admin::form.control-group.label>
 
-                        <x-admin::form.control-group.control
-                            type="text"
-                            id="phone"
-                            name="phone"
-                            rules="required"
-                            :value="old('phone')"
-                            placeholder="Contacto telefónico"
-                        />
+                        <x-admin::form.control-group.control type="text" id="phone" name="phone"
+                            rules="required" :value="old('phone')" placeholder="Contacto telefónico" />
 
                         <x-admin::form.control-group.error control-name="phone" />
+                    </x-admin::form.control-group>
+
+                    <x-admin::form.control-group>
+                        <x-admin::form.control-group.label>
+                            Email
+                        </x-admin::form.control-group.label>
+
+                        <x-admin::form.control-group.control type="email" id="email" name="email"
+                            :value="old('email')" placeholder="nome@exemplo.pt" />
+
+                        <x-admin::form.control-group.error control-name="email" />
                     </x-admin::form.control-group>
                 </div>
             </div>
@@ -89,7 +84,7 @@
                         Dados do imóvel
                     </h2>
                     <p class="text-sm text-gray-500">
-                        Informação do anúncio encontrado no Fizbot.
+                        Informação do anúncio encontrado.
                     </p>
                 </div>
 
@@ -99,12 +94,8 @@
                             Tipo de imóvel
                         </x-admin::form.control-group.label>
 
-                        <x-admin::form.control-group.control
-                            type="select"
-                            id="property_type"
-                            name="property_type"
-                            :value="old('property_type')"
-                        >
+                        <x-admin::form.control-group.control type="select" id="property_type" name="property_type"
+                            :value="old('property_type')">
                             <option value="">Selecionar</option>
                             <option value="Apartamento">Apartamento</option>
                             <option value="Moradia">Moradia</option>
@@ -123,13 +114,8 @@
                             Localidade
                         </x-admin::form.control-group.label>
 
-                        <x-admin::form.control-group.control
-                            type="text"
-                            id="locality"
-                            name="locality"
-                            :value="old('locality')"
-                            placeholder="Ex.: Viseu"
-                        />
+                        <x-admin::form.control-group.control type="text" id="locality" name="locality"
+                            :value="old('locality')" placeholder="Ex.: Viseu" />
 
                         <x-admin::form.control-group.error control-name="locality" />
                     </x-admin::form.control-group>
@@ -139,15 +125,8 @@
                             Preço pedido (€)
                         </x-admin::form.control-group.label>
 
-                        <x-admin::form.control-group.control
-                            type="number"
-                            id="asking_price"
-                            name="asking_price"
-                            step="0.01"
-                            min="0"
-                            :value="old('asking_price')"
-                            placeholder="Ex.: 150000"
-                        />
+                        <x-admin::form.control-group.control type="number" id="asking_price" name="asking_price"
+                            step="0.01" min="0" :value="old('asking_price')" placeholder="Ex.: 150000" />
 
                         <x-admin::form.control-group.error control-name="asking_price" />
                     </x-admin::form.control-group>
@@ -157,13 +136,8 @@
                             Link do anúncio
                         </x-admin::form.control-group.label>
 
-                        <x-admin::form.control-group.control
-                            type="text"
-                            id="listing_url"
-                            name="listing_url"
-                            :value="old('listing_url')"
-                            placeholder="https://..."
-                        />
+                        <x-admin::form.control-group.control type="text" id="listing_url" name="listing_url"
+                            :value="old('listing_url')" placeholder="https://..." />
 
                         <x-admin::form.control-group.error control-name="listing_url" />
                     </x-admin::form.control-group>
@@ -174,13 +148,8 @@
                         Notas
                     </x-admin::form.control-group.label>
 
-                    <x-admin::form.control-group.control
-                        type="textarea"
-                        id="notes"
-                        name="notes"
-                        :value="old('notes')"
-                        placeholder="Observações sobre o proprietário ou imóvel"
-                    />
+                    <x-admin::form.control-group.control type="textarea" id="notes" name="notes" :value="old('notes')"
+                        placeholder="Observações sobre o proprietário ou imóvel" />
 
                     <x-admin::form.control-group.error control-name="notes" />
                 </x-admin::form.control-group>

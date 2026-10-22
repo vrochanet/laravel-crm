@@ -11,8 +11,7 @@ class FSBOLeadService
     public function __construct(
         protected PersonRepository $personRepository,
         protected LeadRepository $leadRepository
-    ) {
-    }
+    ) {}
 
     /**
      * Cria um proprietário, imóvel e lead FSBO.
@@ -50,9 +49,10 @@ class FSBOLeadService
      */
     protected function findOrCreatePerson(array $data)
     {
-        $phone = $data['phone'] ?? null;
+        $phone = trim($data['phone'] ?? '');
+        $email = strtolower(trim($data['email'] ?? ''));
 
-        if ($phone) {
+        if ($phone !== '') {
             $person = $this->personRepository
                 ->whereJsonContains('contact_numbers', [
                     ['value' => $phone],
@@ -60,6 +60,44 @@ class FSBOLeadService
                 ->first();
 
             if ($person) {
+                $person->name = $data['owner_name'];
+
+                if ($email !== '') {
+                    $person->emails = [
+                        [
+                            'value' => $email,
+                            'label' => 'work',
+                        ],
+                    ];
+                }
+
+                $person->save();
+
+                return $person;
+            }
+        }
+
+        if ($email !== '') {
+            $person = $this->personRepository
+                ->whereJsonContains('emails', [
+                    ['value' => $email],
+                ])
+                ->first();
+
+            if ($person) {
+                $person->name = $data['owner_name'];
+
+                if ($phone !== '') {
+                    $person->contact_numbers = [
+                        [
+                            'value' => $phone,
+                            'label' => 'mobile',
+                        ],
+                    ];
+                }
+
+                $person->save();
+
                 return $person;
             }
         }
@@ -67,18 +105,18 @@ class FSBOLeadService
         return $this->personRepository->create([
             'entity_type' => 'persons',
             'name' => $data['owner_name'],
-            'emails' => [
+            'emails' => $email !== '' ? [
                 [
-                    'value' => $data['email'] ?? null,
+                    'value' => $email,
                     'label' => 'work',
                 ],
-            ],
-            'contact_numbers' => [
+            ] : [],
+            'contact_numbers' => $phone !== '' ? [
                 [
                     'value' => $phone,
                     'label' => 'mobile',
                 ],
-            ],
+            ] : [],
         ]);
     }
 
@@ -90,6 +128,6 @@ class FSBOLeadService
         $propertyType = $data['property_type'] ?? 'Imóvel';
         $locality = $data['locality'] ?? '';
 
-        return trim($propertyType . ' ' . $locality);
+        return trim($propertyType.' '.$locality);
     }
 }

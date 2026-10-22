@@ -4,6 +4,7 @@ namespace Webkul\FSBO\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Contact\Models\PersonProxy;
 use Webkul\Lead\Models\LeadProxy;
 
@@ -29,5 +30,10 @@ class Property extends Model
     public function lead(): BelongsTo
     {
         return $this->belongsTo(LeadProxy::modelClass());
+    }
+
+    public function contactLogs(): HasMany
+    {
+        return $this->hasMany(ContactLog::class)->latest();
     }
 }
