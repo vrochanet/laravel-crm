@@ -19,7 +19,7 @@ function leadViewActionsLead(): Lead
     $pipeline = securityTestPipeline();
 
     return Lead::create([
-        'title' => 'Lead view actions '.uniqid(),
+        'title' => 'Lead view actions ' . uniqid(),
         'description' => 'Exercises the actions on a lead page.',
         'lead_value' => 1000,
         'status' => 1,
@@ -34,8 +34,8 @@ function leadViewActionsLead(): Lead
 function leadViewActionsPerson(): Person
 {
     return Person::create([
-        'name' => 'Lead view actions contact '.uniqid(),
-        'emails' => [['value' => uniqid().'@example.invalid', 'label' => 'work']],
+        'name' => 'Lead view actions contact ' . uniqid(),
+        'emails' => [['value' => uniqid() . '@example.invalid', 'label' => 'work']],
         'user_id' => getDefaultAdmin()->id,
     ]);
 }
@@ -58,8 +58,8 @@ function leadViewActionsQuote(string $subject): Quote
 function leadViewActionsProduct(string $suffix = ''): Product
 {
     return Product::create([
-        'sku' => 'LVA-'.uniqid().$suffix,
-        'name' => 'Lead view actions product '.$suffix,
+        'sku' => 'LVA-' . uniqid() . $suffix,
+        'name' => 'Lead view actions product ' . $suffix,
         'price' => 100,
         'quantity' => 10,
     ]);
@@ -79,7 +79,7 @@ it('moves a lead to another stage', function () {
 
     $stage = $lead->pipeline->stages()->create([
         'name' => 'Lead view actions stage',
-        'code' => 'lva-'.uniqid(),
+        'code' => 'lva-' . uniqid(),
         'probability' => 100,
         'sort_order' => 99,
     ]);
@@ -109,7 +109,7 @@ it('attaches and detaches a tag', function () {
     $lead = leadViewActionsLead();
 
     $tag = Tag::create([
-        'name' => 'Lead view actions '.uniqid(),
+        'name' => 'Lead view actions ' . uniqid(),
         'color' => '#FF0000',
         'user_id' => getDefaultAdmin()->id,
     ]);
@@ -185,20 +185,22 @@ it('answers with not found when detaching a quote that does not exist', function
         ->assertNotFound();
 });
 
-it('detaches a quote whose id does not name a lead', function () {
+it('detaches a quote without deleting the quote or any lead', function () {
     $lead = leadViewActionsLead();
 
-    $quote = leadViewActionsQuote('Quote with no matching lead id');
-
-    expect(Lead::find($quote->id))->toBeNull();
+    $quote = leadViewActionsQuote('Quote with overlapping id');
 
     $lead->quotes()->attach($quote->id);
+
+    expect($lead->refresh()->quotes->pluck('id'))->toContain($quote->id);
 
     $this->actingAs(getDefaultAdmin(), 'user')
         ->deleteJson(route('admin.leads.quotes.delete', $quote->id))
         ->assertOk();
 
-    expect($lead->refresh()->quotes->pluck('id'))->not->toContain($quote->id);
+    expect($lead->refresh()->quotes->pluck('id'))->not->toContain($quote->id)
+        ->and(Quote::find($quote->id))->not->toBeNull()
+        ->and(Lead::find($lead->id))->not->toBeNull();
 });
 
 it('deletes a lead', function () {
@@ -216,7 +218,7 @@ it('gives a lead and its quote the same products when they are linked', function
 
     $quote = leadViewActionsQuote('Lead view actions sync');
 
-    $quoteProducts = collect(range(1, 4))->map(fn ($i) => leadViewActionsProduct("q$i"));
+    $quoteProducts = collect(range(1, 4))->map(fn($i) => leadViewActionsProduct("q$i"));
 
     foreach ($quoteProducts as $product) {
         QuoteItem::create([
@@ -232,7 +234,7 @@ it('gives a lead and its quote the same products when they are linked', function
         ]);
     }
 
-    $leadProducts = collect(range(1, 2))->map(fn ($i) => leadViewActionsProduct("l$i"));
+    $leadProducts = collect(range(1, 2))->map(fn($i) => leadViewActionsProduct("l$i"));
 
     foreach ($leadProducts as $product) {
         LeadProduct::create([

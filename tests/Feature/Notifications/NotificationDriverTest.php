@@ -169,7 +169,10 @@ it('gives the browser nothing when there is no address to reach', function () {
 it('honours reverb running without tls', function () {
     configureNotificationReverb();
 
-    config(['broadcasting.connections.reverb.options.scheme' => 'http']);
+    config([
+        'broadcasting.connections.reverb.options.scheme' => 'http',
+        'broadcasting.connections.reverb.options.useTLS' => false,
+    ]);
 
     expect(NotificationDriver::clientConfig()['forceTLS'])->toBeFalse();
 });
