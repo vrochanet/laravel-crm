@@ -2,9 +2,10 @@
 
 namespace Webkul\Prospeccao\Services;
 
+use Illuminate\Support\Facades\DB;
 use Webkul\Contact\Repositories\PersonRepository;
-use Webkul\Prospeccao\Models\Property;
 use Webkul\Lead\Repositories\LeadRepository;
+use Webkul\Prospeccao\Models\Property;
 
 class ProspeccaoLeadService
 {
@@ -14,38 +15,40 @@ class ProspeccaoLeadService
     ) {}
 
     /**
-     * Cria um proprietário, imóvel e lead Prospeccao.
+     * Cria ou reutiliza uma pessoa e regista o imóvel e a lead.
      */
     public function create(array $data): array
     {
-        $person = $this->findOrCreatePerson($data);
+        return DB::transaction(function () use ($data) {
+            $person = $this->findOrCreatePerson($data);
 
-        $lead = $this->leadRepository->create([
-            'entity_type' => 'leads',
-            'title' => $this->buildLeadTitle($data),
-            'person_id' => $person->id,
-            'description' => $data['notes'] ?? null,
-        ]);
+            $lead = $this->leadRepository->create([
+                'entity_type' => 'leads',
+                'title' => $this->buildLeadTitle($data),
+                'person_id' => $person->id,
+                'description' => $data['notes'] ?? null,
+            ]);
 
-        $property = Property::create([
-            'person_id' => $person->id,
-            'lead_id' => $lead->id,
-            'property_type' => $data['property_type'] ?? null,
-            'locality' => $data['locality'] ?? null,
-            'asking_price' => $data['asking_price'] ?? null,
-            'listing_url' => $data['listing_url'] ?? null,
-            'notes' => $data['notes'] ?? null,
-        ]);
+            $property = Property::create([
+                'person_id' => $person->id,
+                'lead_id' => $lead->id,
+                'property_type' => $data['property_type'] ?? null,
+                'locality' => $data['locality'] ?? null,
+                'asking_price' => $data['asking_price'] ?? null,
+                'listing_url' => $data['listing_url'] ?? null,
+                'notes' => $data['notes'] ?? null,
+            ]);
 
-        return [
-            'person' => $person,
-            'property' => $property,
-            'lead' => $lead,
-        ];
+            return [
+                'person' => $person,
+                'property' => $property,
+                'lead' => $lead,
+            ];
+        });
     }
 
     /**
-     * Procura o proprietÃ¡rio pelo telefone ou cria uma nova pessoa.
+     * Reutiliza uma pessoa existente sem alterar os seus dados pessoais.
      */
     protected function findOrCreatePerson(array $data)
     {
@@ -60,19 +63,6 @@ class ProspeccaoLeadService
                 ->first();
 
             if ($person) {
-                $person->name = $data['owner_name'];
-
-                if ($email !== '') {
-                    $person->emails = [
-                        [
-                            'value' => $email,
-                            'label' => 'work',
-                        ],
-                    ];
-                }
-
-                $person->save();
-
                 return $person;
             }
         }
@@ -85,19 +75,6 @@ class ProspeccaoLeadService
                 ->first();
 
             if ($person) {
-                $person->name = $data['owner_name'];
-
-                if ($phone !== '') {
-                    $person->contact_numbers = [
-                        [
-                            'value' => $phone,
-                            'label' => 'mobile',
-                        ],
-                    ];
-                }
-
-                $person->save();
-
                 return $person;
             }
         }
@@ -121,14 +98,13 @@ class ProspeccaoLeadService
     }
 
     /**
-     * Cria o tÃ­tulo do lead.
+     * Cria o título da lead.
      */
     protected function buildLeadTitle(array $data): string
     {
-        $propertyType = $data['property_type'] ?? 'ImÃ³vel';
+        $propertyType = $data['property_type'] ?? 'Imóvel';
         $locality = $data['locality'] ?? '';
 
         return trim($propertyType.' '.$locality);
     }
 }
-
