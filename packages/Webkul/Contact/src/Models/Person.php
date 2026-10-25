@@ -42,6 +42,7 @@ class Person extends Model implements PersonContract
     protected $casts = [
         'emails' => 'array',
         'contact_numbers' => 'array',
+        'is_archived' => 'boolean',
     ];
 
     /**

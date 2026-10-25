@@ -4,7 +4,8 @@
     </x-slot>
 
     <div class="flex flex-col gap-4">
-        <div class="scroll-reactive-sticky sticky top-[60px] z-[1000] flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+        <div
+            class="scroll-reactive-sticky sticky top-[60px] z-[1000] flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
             <div class="flex flex-col gap-2">
                 <x-admin::breadcrumbs name="contacts.persons" />
 
@@ -15,20 +16,16 @@
 
             <div class="flex items-center gap-x-2.5">
                 <!-- Export Modal -->
-                <x-admin::datagrid.export
-                    :src="route('admin.contacts.persons.index')"
-                    :google-contacts-src="bouncer()->hasPermission('contacts.persons.export_google') ? route('admin.contacts.persons.google_export.store') : null"
-                />
+                <x-admin::datagrid.export :src="route('admin.contacts.persons.index')" :google-contacts-src="bouncer()->hasPermission('contacts.persons.export_google')
+                    ? route('admin.contacts.persons.google_export.store')
+                    : null" />
 
                 <!-- Create button for person -->
                 <div class="flex items-center gap-x-2.5">
                     {!! view_render_event('admin.persons.index.create_button.before') !!}
 
                     @if (bouncer()->hasPermission('contacts.persons.create'))
-                        <a
-                            href="{{ route('admin.contacts.persons.create') }}"
-                            class="primary-button"
-                        >
+                        <a href="{{ route('admin.contacts.persons.create') }}" class="primary-button">
                             @lang('admin::app.contacts.persons.index.create-btn')
                         </a>
                     @endif
@@ -38,11 +35,21 @@
             </div>
         </div>
 
+        <div class="flex gap-2">
+            <a href="{{ route('admin.contacts.persons.index') }}" class="secondary-button">
+                @lang('admin::app.contacts.persons.index.active-contacts')
+            </a>
+
+            <a href="{{ route('admin.contacts.persons.index', ['archived' => 1]) }}" class="secondary-button">
+                @lang('admin::app.contacts.persons.index.archived-contacts')
+            </a>
+        </div>
+
         {!! view_render_event('admin.persons.index.datagrid.before') !!}
 
         <v-persons>
             <!-- Datagrid shimmer -->
-            <x-admin::shimmer.datagrid :is-multi-row="true"/>
+            <x-admin::shimmer.datagrid :is-multi-row="true" />
         </v-persons>
 
         {!! view_render_event('admin.persons.index.datagrid.after') !!}
@@ -157,7 +164,7 @@
                                         </span>
                                     </label>
                                 </div>
-                                
+
                                 <!-- Mobile Sort Dropdown -->
                                 <div v-if="available.columns.some(column => column.sortable)">
                                     <x-admin::dropdown position="bottom-{{ in_array(app()->getLocale(), ['fa', 'ar']) ? 'left' : 'right' }}">
@@ -170,12 +177,12 @@
                                                     <span>
                                                         Sort
                                                     </span>
-                    
+
                                                     <span class="icon-down-arrow text-2xl"></span>
                                                 </button>
                                             </div>
                                         </x-slot>
-                
+
                                         <x-slot:menu>
                                             <x-admin::dropdown.menu.item
                                                 v-for="column in available.columns.filter(column => column.sortable && column.visibility)"
@@ -297,7 +304,7 @@
                                                 class="peer hidden"
                                                 v-model="applied.massActions.indices"
                                             >
-    
+
                                             <span class="icon-checkbox-outline peer-checked:icon-checkbox-select cursor-pointer rounded-md text-2xl text-gray-500 peer-checked:text-brandColor">
                                             </span>
                                         </label>

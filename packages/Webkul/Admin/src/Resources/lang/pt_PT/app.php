@@ -234,7 +234,7 @@ return [
                 'not-allowed-error' => 'Apenas são permitidos ficheiros de vídeo (.mp4, .mov, .ogg, ...).',
             ],
         ],
-        'daetiquetarid' => [
+        'datagrid' => [
             'index' => [
                 'no-records-selected' => 'Nenhum registo foi selecionado.',
                 'must-select-a-mass-action-option' => 'Deve selecionar uma opção de ação em massa.',
@@ -399,7 +399,7 @@ return [
             'update-success' => 'Cotação atualizada com sucesso.',
             'delete-success' => 'Cotação eliminada com sucesso.',
             'delete-failed' => 'Não é possível eliminar a cotação.',
-            'daetiquetarid' => [
+            'datagrid' => [
                 'subject' => 'Assunto',
                 'sales-person' => 'Vendedor',
                 'expired-at' => 'Expirado em',
@@ -511,18 +511,19 @@ return [
                 'none-delete-warning' => 'Nenhuma das pessoas selecionadas pôde ser eliminada porque estão associadas a leads.',
                 'no-selection' => 'Nenhuma pessoa foi selecionada para eliminação.',
                 'delete-failed' => 'Falha ao eliminar as pessoas selecionadas.',
-                'daetiquetarid' => [
+                'archive-success' => 'Contacto arquivado com sucesso.',
+                'restore-success' => 'Contacto restaurado com sucesso.',
+                'already-archived' => 'Este contacto já está arquivado.',
+                'not-archived' => 'Este contacto não está arquivado.',
+                'active-contacts' => 'Contactos ativos',
+                'archived-contacts' => 'Contactos arquivados',
+                'datagrid' => [
                     'contact-numbers' => 'Números de Contacto',
                     'delete' => 'Eliminar',
                     'edit' => 'Editar',
-                    'emails' => 'E-mails',
-                    'id' => 'ID',
-                    'view' => 'Ver',
-                    'name' => 'Nome',
-                    'organization-name' => 'Nome da empresa',
-                    'etiqueta-name' => 'Nome da etiqueta',
-                    'google-export-not-connected' => 'Ligue a sua conta do Google primeiro em Definições > Outras Definições > Contactos Google.',
-                    'google-export-started' => 'Exportação para o Contactos Google iniciada.',
+                    'archive' => 'Arquivar contacto',
+                    'restore' => 'Restaurar contacto',
+                    'manage-archive' => 'Gerir arquivo',
                 ],
             ],
             'view' => [
@@ -610,7 +611,7 @@ return [
                 'update-success' => 'Empresa atualizada com sucesso.',
                 'delete-success' => 'Empresa eliminada com sucesso.',
                 'delete-failed' => 'Não foi possível eliminar a empresa.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'edit' => 'Editar',
                     'id' => 'ID',
@@ -636,7 +637,7 @@ return [
             'update-success' => 'Produto atualizado com sucesso.',
             'delete-success' => 'Produto eliminado com sucesso.',
             'delete-failed' => 'Não foi possível eliminar o produto.',
-            'daetiquetarid' => [
+            'datagrid' => [
                 'allocated' => 'Alocado',
                 'delete' => 'Eliminar',
                 'edit' => 'Editar',
@@ -697,7 +698,7 @@ return [
                 'destroy-success' => 'Grupo eliminado com sucesso.',
                 'delete-failed' => 'Não foi possível eliminar o grupo.',
                 'delete-failed-associated-users' => 'Não foi possível eliminar o grupo, pois está sendo utilizado por utilizadores.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'description' => 'Descrição',
                     'edit' => 'Editar',
@@ -729,7 +730,7 @@ return [
                 'title' => 'Cargos',
                 'update-success' => 'Cargo atualizado com sucesso.',
                 'user-define-error' => 'Não é possível eliminar cargo do sistema.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'all' => 'Todos',
                     'custom' => 'Personalizado',
                     'delete' => 'Eliminar',
@@ -773,7 +774,7 @@ return [
                 'delete-success' => 'Tipo eliminado com sucesso.',
                 'title' => 'Tipos',
                 'update-success' => 'Tipo atualizado com sucesso.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'description' => 'Descrição',
                     'edit' => 'Editar',
@@ -799,7 +800,7 @@ return [
                 'delete-success' => 'Origem eliminada com sucesso.',
                 'update-success' => 'Origem atualizada com sucesso.',
                 'delete-failed-associated-leads' => 'Não é possível eliminar a fonte porque está associada a leads existentes. Por favor, desassocie ou atualize essas leads antes da eliminação.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'edit' => 'Editar',
                     'id' => 'ID',
@@ -823,7 +824,7 @@ return [
                 'update-success' => 'Workflow atualizado com sucesso.',
                 'delete-success' => 'Workflow eliminado com sucesso.',
                 'delete-failed' => 'Não é possível eliminar o Workflow.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'description' => 'Descrição',
                     'edit' => 'Editar',
@@ -935,7 +936,7 @@ return [
                 'update-success' => 'Formulário Web atualizado com sucesso.',
                 'delete-success' => 'Formulário Web eliminado com sucesso.',
                 'delete-failed' => 'Não é possível eliminar o Formulário Web.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'id' => 'ID',
                     'title' => 'Título',
                     'edit' => 'Editar',
@@ -1015,7 +1016,7 @@ return [
                 'update-success' => 'Modelo de E-mail atualizado com sucesso.',
                 'delete-success' => 'Modelo de E-mail eliminado com sucesso.',
                 'delete-failed' => 'Não é possível eliminar o Modelo de E-mail.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'edit' => 'Editar',
                     'id' => 'ID',
@@ -1055,7 +1056,7 @@ return [
                     'delete-failed' => 'Não é possível eliminar o evento.',
                     'mass-delete-success' => 'Eventos eliminados com sucesso',
                     'delete-failed-associated-campaigns' => 'Não é possível eliminar o evento, pois está associado a campanhas existentes. Por favor, desassocie ou atualize essas campanhas antes da eliminação.',
-                    'daetiquetarid' => [
+                    'datagrid' => [
                         'delete' => 'Eliminar',
                         'edit' => 'Editar',
                         'id' => 'ID',
@@ -1084,7 +1085,7 @@ return [
                     'delete-success' => 'Campanha eliminada com sucesso.',
                     'delete-failed' => 'Não é possível eliminar a campanha.',
                     'mass-delete-success' => 'Campanhas eliminadas com sucesso',
-                    'daetiquetarid' => [
+                    'datagrid' => [
                         'id' => 'ID',
                         'name' => 'Nome',
                         'subject' => 'Assunto',
@@ -1117,7 +1118,7 @@ return [
                 'update-success' => 'Etiqueta atualizada com sucesso.',
                 'delete-success' => 'Etiqueta eliminada com sucesso.',
                 'delete-failed' => 'Não é possível eliminar a Etiqueta.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'edit' => 'Editar',
                     'id' => 'ID',
@@ -1152,7 +1153,7 @@ return [
                 'user-define-error' => 'Não é possível eliminar o utilizador do sistema.',
                 'active' => 'Ativo',
                 'inactive' => 'Inativo',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'active' => 'Ativo',
                     'created-at' => 'Criado Em',
                     'delete' => 'Eliminar',
@@ -1199,7 +1200,7 @@ return [
                 'delete-success' => 'Funil eliminado com sucesso.',
                 'delete-failed' => 'Não foi possível eliminar o funil.',
                 'default-delete-error' => 'Não é possível eliminar o funil predefinido.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'delete' => 'Eliminar',
                     'edit' => 'Editar',
                     'id' => 'ID',
@@ -1259,7 +1260,7 @@ return [
                 'delete-success' => 'Webhook eliminado com sucesso.',
                 'delete-failed' => 'Webhook não pode ser eliminado.',
                 'invalid-endpoint' => 'A URL do endpoint do webhook deve ser um endereço HTTP ou HTTPS público.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'id' => 'ID',
                     'delete' => 'Eliminar',
                     'edit' => 'Editar',
@@ -1335,7 +1336,7 @@ return [
                 'update-success' => 'Depósito atualizado com sucesso.',
                 'delete-success' => 'Depósito eliminado com sucesso.',
                 'delete-failed' => 'Depósito não pode ser eliminado.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'id' => 'ID',
                     'name' => 'Nome',
                     'contact-name' => 'Nome de Contacto',
@@ -1392,7 +1393,7 @@ return [
                 'delete-failed' => 'Atributo não podem ser eliminados.',
                 'user-define-error' => 'Não é possível eliminar atributos do sistema.',
                 'mass-delete-failed' => 'Atributos do sistema não podem ser eliminados.',
-                'daetiquetarid' => [
+                'datagrid' => [
                     'yes' => 'Sim',
                     'no' => 'Não',
                     'id' => 'ID',
@@ -1611,7 +1612,7 @@ return [
                 'index' => [
                     'button-title' => 'Create Import',
                     'title' => 'Imports',
-                    'daetiquetarid' => [
+                    'datagrid' => [
                         'actions' => 'Actions',
                         'completed-at' => 'Completed At',
                         'created' => 'Created',
@@ -1667,7 +1668,7 @@ return [
     'activities' => [
         'index' => [
             'title' => 'Atividades',
-            'daetiquetarid' => [
+            'datagrid' => [
                 'comment' => 'Comentário',
                 'created_at' => 'Criado Em',
                 'created_by' => 'Criado Por',
@@ -1743,7 +1744,7 @@ return [
                 'message' => 'Mensagem',
                 'draft' => 'Rascunho',
             ],
-            'daetiquetarid' => [
+            'datagrid' => [
                 'id' => 'ID',
                 'from' => 'De',
                 'to' => 'Para',
@@ -1848,7 +1849,7 @@ return [
         'index' => [
             'title' => 'Oportunidades',
             'create-btn' => 'Adicionar oportunidade',
-            'daetiquetarid' => [
+            'datagrid' => [
                 'id' => 'ID',
                 'sales-person' => 'Vendedor',
                 'subject' => 'Assunto',

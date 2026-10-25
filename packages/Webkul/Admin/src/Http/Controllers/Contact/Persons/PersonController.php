@@ -3,6 +3,7 @@
 namespace Webkul\Admin\Http\Controllers\Contact\Persons;
 
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -137,9 +138,9 @@ class PersonController extends Controller
         if ($searchTerm = request()->query('query')) {
             $personRepository = $personRepository->scopeQuery(function ($query) use ($searchTerm) {
                 return $query->where(function ($q) use ($searchTerm) {
-                    $q->where('name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('emails', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('contact_numbers', 'like', '%'.$searchTerm.'%');
+                    $q->where('name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('emails', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('contact_numbers', 'like', '%' . $searchTerm . '%');
                 });
             });
         }
@@ -154,13 +155,64 @@ class PersonController extends Controller
     }
 
     /**
+     * Archive the specified person without deleting related records.
+     */
+    public function archive(int $id): JsonResponse
+    {
+        $person = $this->personRepository->findOrFail($id);
+
+        $this->preventUnauthorizedAccess($person->user_id);
+
+        if ($person->is_archived) {
+            return response()->json([
+                'message' => trans('admin::app.contacts.persons.index.already-archived'),
+            ], 400);
+        }
+
+        $person->is_archived = true;
+        $person->save();
+
+        return response()->json([
+            'message' => trans('admin::app.contacts.persons.index.archive-success'),
+        ]);
+    }
+
+    /**
+     * Restore the specified archived person.
+     */
+    public function restore(int $id): JsonResponse
+    {
+        $person = $this->personRepository->findOrFail($id);
+
+        $this->preventUnauthorizedAccess($person->user_id);
+
+        if (!$person->is_archived) {
+            return response()->json([
+                'message' => trans('admin::app.contacts.persons.index.not-archived'),
+            ], 400);
+        }
+
+        $person->is_archived = false;
+        $person->save();
+
+        return response()->json([
+            'message' => trans('admin::app.contacts.persons.index.restore-success'),
+        ]);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(int $id): JsonResponse
     {
         $person = $this->personRepository->findOrFail($id);
-
         $this->preventUnauthorizedAccess($person->user_id);
+
+        if (DB::table('prospeccao_properties')->where('person_id', $person->id)->exists()) {
+            return response()->json([
+                'message' => trans('admin::app.contacts.persons.index.delete-failed'),
+            ], 400);
+        }
 
         if (
             $person->leads
@@ -204,6 +256,12 @@ class PersonController extends Controller
             $blockedCount = 0;
 
             foreach ($persons as $person) {
+                if (DB::table('prospeccao_properties')->where('person_id', $person->id)->exists()) {
+                    $blockedCount++;
+
+                    continue;
+                }
+
                 if (
                     $person->leads
                     && $person->leads->count() > 0

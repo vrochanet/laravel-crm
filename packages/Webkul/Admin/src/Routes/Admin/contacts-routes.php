@@ -24,6 +24,10 @@ Route::prefix('contacts')->group(function () {
 
         Route::put('edit/{id}', 'update')->name('admin.contacts.persons.update');
 
+        Route::post('{id}/archive', 'archive')->name('admin.contacts.persons.archive');
+
+        Route::post('{id}/restore', 'restore')->name('admin.contacts.persons.restore');
+
         Route::get('search', 'search')->name('admin.contacts.persons.search');
 
         Route::middleware(['throttle:100,60'])->delete('{id}', 'destroy')->name('admin.contacts.persons.delete');

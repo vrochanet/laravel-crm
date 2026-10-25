@@ -18,7 +18,9 @@ class PersonDataGrid extends DataGrid
      *
      * @return void
      */
-    public function __construct(protected OrganizationRepository $organizationRepository) {}
+    public function __construct(protected OrganizationRepository $organizationRepository)
+    {
+    }
 
     /**
      * Prepare query builder.
@@ -31,6 +33,7 @@ class PersonDataGrid extends DataGrid
                 'persons.name as person_name',
                 'persons.emails',
                 'persons.contact_numbers',
+                'persons.is_archived',
                 'organizations.name as organization',
                 'organizations.id as organization_id',
                 'tags.name as tag_name'
@@ -52,15 +55,17 @@ class PersonDataGrid extends DataGrid
                 $valueColumn = AttributeValue::$attributeTypeFields[$attribute->type] ?? 'text_value';
 
                 $queryBuilder->addSelect(DB::raw(
-                    '(SELECT '.$tablePrefix.'attribute_values.'.$valueColumn.
-                    ' FROM '.$tablePrefix.'attribute_values'.
-                    ' WHERE '.$tablePrefix.'attribute_values.entity_id = '.$tablePrefix.'persons.id'.
-                    ' AND '.$tablePrefix.'attribute_values.attribute_id = '.(int) $attribute->id.
-                    ' AND '.$tablePrefix."attribute_values.entity_type = 'persons'".
-                    ' LIMIT 1) as '.$attribute->code
+                    '(SELECT ' . $tablePrefix . 'attribute_values.' . $valueColumn .
+                    ' FROM ' . $tablePrefix . 'attribute_values' .
+                    ' WHERE ' . $tablePrefix . 'attribute_values.entity_id = ' . $tablePrefix . 'persons.id' .
+                    ' AND ' . $tablePrefix . 'attribute_values.attribute_id = ' . (int) $attribute->id .
+                    ' AND ' . $tablePrefix . "attribute_values.entity_type = 'persons'" .
+                    ' LIMIT 1) as ' . $attribute->code
                 ));
             }
         }
+
+        $queryBuilder->where('persons.is_archived', request()->boolean('archived'));
 
         if ($userIds = bouncer()->getAuthorizedUserIds()) {
             $queryBuilder->whereIn('persons.user_id', $userIds);
@@ -104,7 +109,7 @@ class PersonDataGrid extends DataGrid
             'sortable' => false,
             'filterable' => true,
             'searchable' => true,
-            'closure' => fn ($row) => collect(json_decode($row->emails, true) ?? [])->pluck('value')->join(', '),
+            'closure' => fn($row) => collect(json_decode($row->emails, true) ?? [])->pluck('value')->join(', '),
         ]);
 
         $this->addColumn([
@@ -114,7 +119,7 @@ class PersonDataGrid extends DataGrid
             'sortable' => true,
             'filterable' => true,
             'searchable' => true,
-            'closure' => fn ($row) => collect(json_decode($row->contact_numbers, true) ?? [])->pluck('value')->join(', '),
+            'closure' => fn($row) => collect(json_decode($row->contact_numbers, true) ?? [])->pluck('value')->join(', '),
         ]);
 
         $this->addColumn([
@@ -142,7 +147,7 @@ class PersonDataGrid extends DataGrid
             'sortable' => true,
             'filterable' => true,
             'filterable_type' => 'searchable_dropdown',
-            'closure' => fn ($row) => $row->tag_name ?? '--',
+            'closure' => fn($row) => $row->tag_name ?? '--',
             'filterable_options' => [
                 'repository' => TagRepository::class,
                 'column' => [
@@ -218,6 +223,22 @@ class PersonDataGrid extends DataGrid
                 'method' => 'DELETE',
                 'url' => function ($row) {
                     return route('admin.contacts.persons.delete', $row->id);
+                },
+            ]);
+        }
+
+        if (bouncer()->hasPermission('contacts.persons.edit')) {
+            $this->addAction([
+                'icon' => 'icon-archive',
+                'title' => trans('admin::app.contacts.persons.index.datagrid.manage-archive'),
+                'method' => 'POST',
+                'url' => function ($row) {
+                    return route(
+                        $row->is_archived
+                        ? 'admin.contacts.persons.restore'
+                        : 'admin.contacts.persons.archive',
+                        $row->id
+                    );
                 },
             ]);
         }
