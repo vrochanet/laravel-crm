@@ -61,3 +61,18 @@ it('preserves a person and property during mass deletion', function () {
         ->and(Property::find($property->id))->not->toBeNull();
 });
 
+it('archives and restores a person', function () {
+    $person = deletionProtectionPerson();
+
+    $this->actingAs(getDefaultAdmin(), 'user')
+        ->postJson(route('admin.contacts.persons.archive', $person->id))
+        ->assertOk();
+
+    expect($person->fresh()->is_archived)->toBeTrue();
+
+    $this->actingAs(getDefaultAdmin(), 'user')
+        ->postJson(route('admin.contacts.persons.restore', $person->id))
+        ->assertOk();
+
+    expect($person->fresh()->is_archived)->toBeFalse();
+});

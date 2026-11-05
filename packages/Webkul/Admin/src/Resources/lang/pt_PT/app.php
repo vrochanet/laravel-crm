@@ -517,6 +517,7 @@ return [
                 'not-archived' => 'Este contacto não está arquivado.',
                 'active-contacts' => 'Contactos ativos',
                 'archived-contacts' => 'Contactos arquivados',
+                'delete-success' => 'Contacto arquivado com sucesso.',
                 'datagrid' => [
                     'contact-numbers' => 'Números de Contacto',
                     'delete' => 'Eliminar',
@@ -524,6 +525,7 @@ return [
                     'archive' => 'Arquivar contacto',
                     'restore' => 'Restaurar contacto',
                     'manage-archive' => 'Gerir arquivo',
+                    'force_delete' => 'Eliminar permanentemente',
                 ],
             ],
             'view' => [

@@ -192,17 +192,40 @@ class PersonDataGrid extends DataGrid
     /**
      * Prepare actions.
      */
+
     public function prepareActions(): void
     {
+        $archivedView = request()->boolean('archived');
+
         if (bouncer()->hasPermission('contacts.persons.view')) {
             $this->addAction([
                 'icon' => 'icon-eye',
                 'title' => trans('admin::app.contacts.persons.index.datagrid.view'),
                 'method' => 'GET',
-                'url' => function ($row) {
-                    return route('admin.contacts.persons.view', $row->id);
-                },
+                'url' => fn($row) => route('admin.contacts.persons.view', $row->id),
             ]);
+        }
+
+        if ($archivedView) {
+            if (bouncer()->hasPermission('contacts.persons.edit')) {
+                $this->addAction([
+                    'icon' => 'icon-enter',
+                    'title' => trans('admin::app.contacts.persons.index.datagrid.restore'),
+                    'method' => 'POST',
+                    'url' => fn($row) => route('admin.contacts.persons.restore', $row->id),
+                ]);
+            }
+
+            if (bouncer()->hasPermission('contacts.persons.delete')) {
+                $this->addAction([
+                    'icon' => 'icon-delete',
+                    'title' => trans('admin::app.contacts.persons.index.datagrid.force_delete'),
+                    'method' => 'DELETE',
+                    'url' => fn($row) => route('admin.contacts.persons.delete', $row->id),
+                ]);
+            }
+
+            return;
         }
 
         if (bouncer()->hasPermission('contacts.persons.edit')) {
@@ -210,39 +233,20 @@ class PersonDataGrid extends DataGrid
                 'icon' => 'icon-edit',
                 'title' => trans('admin::app.contacts.persons.index.datagrid.edit'),
                 'method' => 'GET',
-                'url' => function ($row) {
-                    return route('admin.contacts.persons.edit', $row->id);
-                },
+                'url' => fn($row) => route('admin.contacts.persons.edit', $row->id),
             ]);
         }
 
         if (bouncer()->hasPermission('contacts.persons.delete')) {
             $this->addAction([
                 'icon' => 'icon-delete',
-                'title' => trans('admin::app.contacts.persons.index.datagrid.delete'),
-                'method' => 'DELETE',
-                'url' => function ($row) {
-                    return route('admin.contacts.persons.delete', $row->id);
-                },
-            ]);
-        }
-
-        if (bouncer()->hasPermission('contacts.persons.edit')) {
-            $this->addAction([
-                'icon' => 'icon-archive',
-                'title' => trans('admin::app.contacts.persons.index.datagrid.manage-archive'),
+                'title' => trans('admin::app.contacts.persons.index.datagrid.archive'),
                 'method' => 'POST',
-                'url' => function ($row) {
-                    return route(
-                        $row->is_archived
-                        ? 'admin.contacts.persons.restore'
-                        : 'admin.contacts.persons.archive',
-                        $row->id
-                    );
-                },
+                'url' => fn($row) => route('admin.contacts.persons.archive', $row->id),
             ]);
         }
     }
+
 
     /**
      * Prepare mass actions.

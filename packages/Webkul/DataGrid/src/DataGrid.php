@@ -106,12 +106,16 @@ abstract class DataGrid
     /**
      * Prepare actions.
      */
-    public function prepareActions() {}
+    public function prepareActions()
+    {
+    }
 
     /**
      * Prepare mass actions.
      */
-    public function prepareMassActions() {}
+    public function prepareMassActions()
+    {
+    }
 
     /**
      * Get columns.
@@ -278,7 +282,7 @@ abstract class DataGrid
 
         $this->setExportable(true);
 
-        $this->exportFile = Excel::download(new DataGridExport($this), Str::random(36).'.'.$format);
+        $this->exportFile = Excel::download(new DataGridExport($this), Str::random(36) . '.' . $format);
 
         $this->dispatchEvent('export_file.set.after', $this);
     }
@@ -356,16 +360,16 @@ abstract class DataGrid
                 $this->queryBuilder->where(function ($scopeQueryBuilder) use ($requestedValues) {
                     foreach ($requestedValues as $value) {
                         collect($this->columns)
-                            ->filter(fn ($column) => $column->getSearchable() && ! in_array($column->getType(), [
+                            ->filter(fn($column) => $column->getSearchable() && !in_array($column->getType(), [
                                 ColumnTypeEnum::BOOLEAN->value,
                                 ColumnTypeEnum::AGGREGATE->value,
                             ]))
-                            ->each(fn ($column) => $scopeQueryBuilder->orWhere($column->getColumnName(), 'LIKE', '%'.$value.'%'));
+                            ->each(fn($column) => $scopeQueryBuilder->orWhere($column->getColumnName(), 'LIKE', '%' . $value . '%'));
                     }
                 });
             } else {
                 collect($this->columns)
-                    ->first(fn ($column) => $column->getIndex() === $requestedColumn)
+                    ->first(fn($column) => $column->getIndex() === $requestedColumn)
                     ->processFilter($this->queryBuilder, $requestedValues);
             }
         }
@@ -380,7 +384,7 @@ abstract class DataGrid
      */
     protected function processRequestedSorting($requestedSort)
     {
-        if (! $this->sortColumn) {
+        if (!$this->sortColumn) {
             $this->sortColumn = $this->primaryColumn;
         }
 
@@ -462,7 +466,7 @@ abstract class DataGrid
         $tempRow = json_decode(json_encode($row), true);
 
         foreach ($tempRow as $column => $value) {
-            if (! is_string($tempRow[$column])) {
+            if (!is_string($tempRow[$column])) {
                 continue;
             }
 
@@ -482,7 +486,7 @@ abstract class DataGrid
     protected function formatColumns(): array
     {
         return collect($this->columns)
-            ->map(fn ($column) => $column->toArray())
+            ->map(fn($column) => $column->toArray())
             ->toArray();
     }
 
@@ -492,7 +496,7 @@ abstract class DataGrid
     protected function formatActions(): array
     {
         return collect($this->actions)
-            ->map(fn ($action) => $action->toArray())
+            ->map(fn($action) => $action->toArray())
             ->toArray();
     }
 
@@ -502,7 +506,7 @@ abstract class DataGrid
     protected function formatMassActions(): array
     {
         return collect($this->massActions)
-            ->map(fn ($massAction) => $massAction->toArray())
+            ->map(fn($massAction) => $massAction->toArray())
             ->toArray();
     }
 

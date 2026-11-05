@@ -201,23 +201,34 @@ class PersonController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Permanently delete an archived person.
      */
     public function destroy(int $id): JsonResponse
     {
         $person = $this->personRepository->findOrFail($id);
+
         $this->preventUnauthorizedAccess($person->user_id);
 
-        if (DB::table('prospeccao_properties')->where('person_id', $person->id)->exists()) {
+        // Only archived contacts can be permanently deleted.
+        if (!$person->is_archived) {
+            return response()->json([
+                'message' => 'Só é possível eliminar contactos arquivados.',
+            ], 400);
+        }
+
+        // Prevent deletion when properties are associated.
+        if (
+            DB::table('prospeccao_properties')
+                ->where('person_id', $person->id)
+                ->exists()
+        ) {
             return response()->json([
                 'message' => trans('admin::app.contacts.persons.index.delete-failed'),
             ], 400);
         }
 
-        if (
-            $person->leads
-            && $person->leads->count() > 0
-        ) {
+        // Prevent deletion when leads are associated.
+        if ($person->leads && $person->leads->count() > 0) {
             return response()->json([
                 'message' => trans('admin::app.contacts.persons.index.delete-failed'),
             ], 400);
@@ -226,7 +237,7 @@ class PersonController extends Controller
         try {
             Event::dispatch('contacts.person.delete.before', $person);
 
-            $person->delete();
+            $this->personRepository->delete($id);
 
             Event::dispatch('contacts.person.delete.after', $person);
 
@@ -235,6 +246,8 @@ class PersonController extends Controller
             ], 200);
 
         } catch (Exception $exception) {
+            report($exception);
+
             return response()->json([
                 'message' => trans('admin::app.contacts.persons.index.delete-failed'),
             ], 400);
@@ -273,7 +286,8 @@ class PersonController extends Controller
 
                 Event::dispatch('contact.person.delete.before', $person);
 
-                $this->personRepository->delete($person->id);
+                $person->is_archived = true;
+                $person->save();
 
                 Event::dispatch('contact.person.delete.after', $person);
 
