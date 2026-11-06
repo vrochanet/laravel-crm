@@ -36,5 +36,10 @@ class Property extends Model
     {
         return $this->hasMany(ContactLog::class)->latest();
     }
+
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class);
+    }
 }
 

@@ -25,7 +25,7 @@ class ProspeccaoController extends Controller
 
     public function show(int $id)
     {
-        $property = Property::with(['person', 'lead', 'contactLogs.user', 'contactLogs.template'])
+        $property = Property::with(['person', 'lead', 'conversations.messages',])
             ->findOrFail($id);
 
         $templates = CommunicationTemplate::query()
@@ -130,10 +130,13 @@ class ProspeccaoController extends Controller
 
         $data = $request->validate([
             'template_id' => ['required', 'integer', 'exists:prospeccao_communication_templates,id'],
-            'channel' => ['required', Rule::in([
-                CommunicationTemplate::CHANNEL_WHATSAPP,
-                CommunicationTemplate::CHANNEL_EMAIL,
-            ])],
+            'channel' => [
+                'required',
+                Rule::in([
+                    CommunicationTemplate::CHANNEL_WHATSAPP,
+                    CommunicationTemplate::CHANNEL_EMAIL,
+                ])
+            ],
         ]);
 
         $template = CommunicationTemplate::query()
@@ -141,8 +144,8 @@ class ProspeccaoController extends Controller
             ->findOrFail($data['template_id']);
 
         if (
-            ($data['channel'] === CommunicationTemplate::CHANNEL_WHATSAPP && ! $template->supportsWhatsApp())
-            || ($data['channel'] === CommunicationTemplate::CHANNEL_EMAIL && ! $template->supportsEmail())
+            ($data['channel'] === CommunicationTemplate::CHANNEL_WHATSAPP && !$template->supportsWhatsApp())
+            || ($data['channel'] === CommunicationTemplate::CHANNEL_EMAIL && !$template->supportsEmail())
         ) {
             return redirect()
                 ->route('admin.prospeccao.show', $property->id)
@@ -170,10 +173,13 @@ class ProspeccaoController extends Controller
 
         $data = $request->validate([
             'template_id' => ['required', 'integer', 'exists:prospeccao_communication_templates,id'],
-            'channel' => ['required', Rule::in([
-                CommunicationTemplate::CHANNEL_WHATSAPP,
-                CommunicationTemplate::CHANNEL_EMAIL,
-            ])],
+            'channel' => [
+                'required',
+                Rule::in([
+                    CommunicationTemplate::CHANNEL_WHATSAPP,
+                    CommunicationTemplate::CHANNEL_EMAIL,
+                ])
+            ],
             'subject' => ['nullable', 'required_if:channel,email', 'string', 'max:255'],
             'body' => ['required', 'string'],
         ]);
@@ -194,7 +200,7 @@ class ProspeccaoController extends Controller
                 ->filter()
                 ->first();
 
-            if (! $phone) {
+            if (!$phone) {
                 return redirect()
                     ->route('admin.prospeccao.show', $property->id)
                     ->with('error', 'O contacto nÃ£o tem telefone registado.');
@@ -210,7 +216,7 @@ class ProspeccaoController extends Controller
             ->filter()
             ->first();
 
-        if (! $email) {
+        if (!$email) {
             return redirect()
                 ->route('admin.prospeccao.show', $property->id)
                 ->with('error', 'O contacto nÃ£o tem email registado.');
@@ -231,7 +237,7 @@ class ProspeccaoController extends Controller
             ->filter()
             ->first();
 
-        if (! $phone) {
+        if (!$phone) {
             return redirect()
                 ->route('admin.prospeccao.show', $property->id)
                 ->with('error', 'O contacto nÃ£o tem telefone registado.');
@@ -241,7 +247,7 @@ class ProspeccaoController extends Controller
             'Bom dia, %s. O meu nome Ã© VÃ­tor Rocha, consultor imobiliÃ¡rio da RE/MAX. Encontrei o seu anÃºncio de %s%s e gostaria de saber se estaria disponÃ­vel para conversar sobre a venda do imÃ³vel. Obrigado.',
             $property->person?->name ?? '',
             $property->property_type ?? 'imÃ³vel',
-            $property->locality ? ' em '.$property->locality : ''
+            $property->locality ? ' em ' . $property->locality : ''
         );
 
         return redirect()->away(
@@ -259,7 +265,7 @@ class ProspeccaoController extends Controller
             ->filter()
             ->first();
 
-        if (! $email) {
+        if (!$email) {
             return redirect()
                 ->route('admin.prospeccao.show', $property->id)
                 ->with('error', 'O contacto nÃ£o tem email registado.');
@@ -267,14 +273,14 @@ class ProspeccaoController extends Controller
 
         $subject = sprintf(
             'Contacto sobre o seu anÃºncio%s',
-            $property->locality ? ' em '.$property->locality : ''
+            $property->locality ? ' em ' . $property->locality : ''
         );
 
         $message = sprintf(
             "Bom dia, %s.\n\nO meu nome Ã© VÃ­tor Rocha, consultor imobiliÃ¡rio da RE/MAX. Encontrei o seu anÃºncio de %s%s e gostaria de saber se estaria disponÃ­vel para conversar sobre a venda do imÃ³vel.\n\nObrigado,\nVÃ­tor Rocha\nRE/MAX",
             $property->person?->name ?? '',
             $property->property_type ?? 'imÃ³vel',
-            $property->locality ? ' em '.$property->locality : ''
+            $property->locality ? ' em ' . $property->locality : ''
         );
 
         return redirect()->away(

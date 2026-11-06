@@ -1,6 +1,6 @@
 <x-admin::layouts>
     <x-slot:title>
-        Detalhes do imóvel Prospeção
+        Detalhes do imóvel - Prospecção
     </x-slot>
 
     <div class="flex flex-col gap-4">
@@ -109,14 +109,7 @@
                 <div>
                     <dt class="text-sm text-gray-500">Telefone</dt>
                     <dd class="mt-1 text-gray-800 dark:text-white">
-                        @php
-                            $phone = collect($property->person?->contact_numbers ?? [])
-                                ->pluck('value')
-                                ->filter()
-                                ->first();
-                        @endphp
-
-                        {{ $phone ?: 'Sem telefone registado' }}
+                        {{ collect($property->person?->contact_numbers ?? [])->pluck('value')->filter()->first() ?: 'Sem telefone registado' }}
                     </dd>
                 </div>
 
@@ -159,10 +152,8 @@
                             class="w-full rounded border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             <option value="">Selecionar modelo</option>
                             @foreach ($templates as $template)
-                                <option value="{{ $template->id }}"
-                                    data-channel="{{ $template->channel }}">
-                                    {{ $template->stage }} - {{ $template->name }}
-                                    ({{ $template->channel }})
+                                <option value="{{ $template->id }}" data-channel="{{ $template->channel }}">
+                                    {{ $template->stage }} - {{ $template->name }} ({{ $template->channel }})
                                 </option>
                             @endforeach
                         </select>
@@ -188,43 +179,95 @@
 
         <div class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
             <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
-                Histórico de contactos
+                Conversações
             </h2>
 
-            @if ($property->contactLogs->isEmpty())
+            @if ($property->conversations->isEmpty())
                 <p class="text-sm text-gray-500">
-                    Ainda não foram preparadas mensagens para este imóvel.
+                    Ainda não existem conversações para este imóvel.
                 </p>
             @else
-                <div class="flex flex-col gap-3">
-                    @foreach ($property->contactLogs as $log)
-                        <div class="rounded border border-gray-100 p-3 dark:border-gray-800">
-                            <div class="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                                <span class="font-medium capitalize text-gray-800 dark:text-white">
-                                    {{ $log->channel }}
-                                </span>
-                                <span>·</span>
-                                <span>{{ $log->created_at?->format('d/m/Y H:i') }}</span>
-                                @if ($log->user)
-                                    <span>·</span>
-                                    <span>{{ $log->user->name }}</span>
-                                @endif
-                                @if ($log->template)
-                                    <span>·</span>
-                                    <span>{{ $log->template->name }}</span>
-                                @endif
-                            </div>
+                <div class="flex flex-col gap-6">
+                    @foreach (['whatsapp' => 'WhatsApp', 'email' => 'Email'] as $channel => $channelLabel)
+                        @php
+                            $conversation = $property->conversations->firstWhere('channel', $channel);
+                        @endphp
 
-                            @if ($log->subject)
-                                <p class="mb-1 text-sm font-medium text-gray-800 dark:text-white">
-                                    Assunto: {{ $log->subject }}
-                                </p>
-                            @endif
+                        @if ($conversation)
+                            <section class="border-t border-gray-200 pt-4 first:border-0 first:pt-0 dark:border-gray-700">
+                                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                    <h3 class="font-semibold text-gray-800 dark:text-white">
+                                        {{ $channelLabel }}
+                                    </h3>
 
-                            <p class="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">
-                                {{ $log->body }}
-                            </p>
-                        </div>
+                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                        {{ [
+                                            'active' => 'Ativa',
+                                            'waiting_reply' => 'A aguardar resposta',
+                                            'paused' => 'Pausada',
+                                            'closed' => 'Encerrada',
+                                        ][$conversation->status] ?? $conversation->status }}
+                                    </span>
+                                </div>
+
+                                @if ($conversation->messages->isEmpty())
+                                    <p class="text-sm text-gray-500">
+                                        Ainda não existem mensagens nesta conversação.
+                                    </p>
+                                @else
+                                    <div class="flex flex-col gap-3">
+                                        @foreach ($conversation->messages as $message)
+                                            <div class="max-w-3xl rounded-lg border border-gray-200 p-4 dark:border-gray-700
+                                                {{ $message->direction === 'outgoing' ? 'ml-auto bg-blue-50 dark:bg-gray-800' : 'mr-auto bg-gray-50 dark:bg-gray-800' }}">
+                                                <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                                    <span class="font-semibold">
+                                                        {{ $message->direction === 'outgoing' ? 'Enviada' : 'Recebida' }}
+                                                    </span>
+
+                                                    <span>·</span>
+
+                                                    <span>
+                                                        {{ $message->created_at?->format('d/m/Y H:i') }}
+                                                    </span>
+
+                                                    <span>·</span>
+
+                                                    <span>
+                                                        {{ [
+                                                            'draft' => 'Rascunho',
+                                                            'pending_review' => 'Pendente de aprovação',
+                                                            'approved' => 'Aprovada',
+                                                            'sent' => 'Enviada',
+                                                            'received' => 'Recebida',
+                                                            'failed' => 'Falhou',
+                                                            'cancelled' => 'Cancelada',
+                                                        ][$message->status] ?? $message->status }}
+                                                    </span>
+
+                                                    @if ($message->source === 'ai')
+                                                        <span>·</span>
+                                                        <span>Preparada por IA</span>
+                                                    @elseif ($message->source === 'template')
+                                                        <span>·</span>
+                                                        <span>Modelo</span>
+                                                    @endif
+                                                </div>
+
+                                                @if ($message->subject)
+                                                    <p class="mb-2 text-sm font-semibold text-gray-800 dark:text-white">
+                                                        {{ $message->subject }}
+                                                    </p>
+                                                @endif
+
+                                                <p class="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">
+                                                    {{ $message->body }}
+                                                </p>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </section>
+                        @endif
                     @endforeach
                 </div>
             @endif
@@ -241,5 +284,3 @@
         </div>
     </div>
 </x-admin::layouts>
-
-
