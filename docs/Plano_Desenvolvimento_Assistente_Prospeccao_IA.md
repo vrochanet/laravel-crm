@@ -2,48 +2,37 @@
 
 **Projeto:** CRM imobiliário baseado em Krayin\
 **Módulo:** `packages/Webkul/Prospeccao`\
-**Data:** 05-11-2026
+**Data de atualização:** 10-11-2026
+
+**Versão do plano:** 2.0
 
 ## 1. Objetivo
 
-Evoluir o módulo Prospeção existente para um assistente de prospeção
-imobiliária com IA. O consultor controla todas as comunicações: a IA
-analisa, prepara e sugere; o consultor revê, decide e envia manualmente.
+Evoluir o módulo Prospeção existente para um assistente de prospeção imobiliária com IA, preparado para comunicação manual e automatizada. O utilizador configura o modo de funcionamento por canal. A IA analisa, prepara e recomenda; o envio automático só pode ocorrer quando estiver expressamente ativado e todas as regras e condições estiverem cumpridas. No modo manual, a decisão e o envio ficam sob controlo do consultor.
 
 ### Fluxo pretendido
 
-1.  O consultor encontra manualmente um anúncio particular.
-2.  Introduz manualmente o anúncio, imóvel e dados do proprietário no
-    CRM.
-3.  O sistema organiza os dados e procura possíveis duplicados.
-4.  A IA analisa o contexto e prepara uma primeira mensagem.
-5.  O consultor revê, altera e decide se envia.
-6.  O consultor envia manualmente pelo WhatsApp.
-7.  Copia a resposta recebida para o CRM.
-8.  A IA analisa a resposta e o histórico e propõe uma resposta
-    seguinte.
-9.  O consultor revê e envia manualmente.
-10. O processo termina com reunião, oportunidade, recusa ou
-    encerramento.
+1. O consultor encontra manualmente um anúncio particular.
+2. Introduz manualmente o anúncio, imóvel e dados do proprietário no CRM.
+3. O sistema organiza os dados e procura possíveis duplicados.
+4. A IA analisa o contexto e prepara a primeira mensagem.
+5. O sistema aplica as regras do canal e calcula a próxima data recomendada.
+6. No modo manual, o consultor revê, decide e envia externamente; no modo automático, o sistema só envia se a automatização estiver ativa e todas as condições forem cumpridas.
+7. A resposta é registada manualmente ou recebida por integração, conforme as capacidades do canal implementado.
+8. A IA analisa a resposta e o histórico e propõe a abordagem seguinte.
+9. O processo termina com reunião, oportunidade, recusa, oposição a contacto ou encerramento.
 
 ### Fora do âmbito da primeira versão
 
--   Pesquisa automática de anúncios.
--   Recolha automática ou em massa de números.
--   Envio automático de mensagens.
--   Leitura automática do WhatsApp.
--   API WhatsApp Business Cloud.
--   Respostas autónomas da IA.
--   Chamadas telefónicas automáticas.
--   Criação de um segundo CRM.
+- Pesquisa automática de anúncios.
+- Recolha automática ou em massa de números/contactos.
+- Respostas autónomas da IA sem regras, limites e controlos configurados.
+- Chamadas telefónicas automáticas.
+- Criação de um segundo CRM.
 
-O sistema pode preparar texto e abrir `wa.me`, mas abrir o WhatsApp não
-significa que a mensagem tenha sido enviada. O consultor confirma
-manualmente o envio.
+No modo manual, abrir `wa.me` ou o cliente de email não significa que a mensagem tenha sido enviada; o consultor confirma o envio no CRM. No modo automático, o envio depende de uma integração técnica suportada, de configuração explícita e do cumprimento das regras de segurança e frequência.
 
-**Limite operacional:** máximo de cinco novos primeiros contactos por
-dia, de segunda a sexta-feira. É uma regra de organização, não um
-mecanismo de envio automático nem uma garantia de conformidade legal.
+**Limite operacional inicial:** máximo de cinco novos primeiros contactos por dia útil (segunda a sexta-feira). O limite deve ser configurável e aplicado ao envio automático; no modo manual, deve ser apresentado como limite/recomendação operacional e impedir ou alertar conforme a política definida. Não constitui garantia de conformidade legal.
 
 ## 2. Princípios
 
@@ -51,12 +40,14 @@ mecanismo de envio automático nem uma garantia de conformidade legal.
 2.  Evoluir o pacote Prospeção existente.
 3.  Reutilizar Pessoas e Leads do Krayin.
 4.  Evitar duplicação de Pessoas, Leads e imóveis.
-5.  Exigir aprovação humana para todas as comunicações.
-6.  Manter histórico auditável.
-7.  Minimizar dados pessoais enviados ao fornecedor de IA.
-8.  Implementar uma etapa de cada vez.
-9.  Não assumir versões ou comportamentos sem confirmar no código.
-10. Não misturar este projeto com a SO Platform ou outros projetos.
+5.  Suportar modo manual e modo automatizado, configuráveis por canal.
+6.  Manter aprovação humana configurável; por defeito, obrigatória.
+7.  Aplicar limites de frequência tanto no modo manual (recomendação/alerta) como no automático (bloqueio de execução).
+8.  Manter histórico auditável e não sobrescrever mensagens efetivamente enviadas/recebidas.
+9.  Minimizar dados pessoais enviados ao fornecedor de IA.
+10. Implementar uma etapa de cada vez.
+11. Não assumir versões ou comportamentos sem confirmar no código.
+12. Não misturar este projeto com a SO Platform ou outros projetos.
 
 ## 3. Stack tecnológica
 
@@ -89,7 +80,42 @@ envia mensagens ao WhatsApp. Escolher fornecedor/modelo antes da
 implementação, considerando qualidade em português europeu, custo,
 privacidade, retenção e condições de tratamento.
 
-## 4. Estado atual conhecido
+## 4. Configuração de comunicação e regras de frequência
+
+### Modos de funcionamento
+
+- **Manual:** o sistema prepara mensagens e recomenda quando contactar. O consultor revê, decide, envia fora do CRM e confirma o envio no CRM.
+- **Automático:** o sistema pode executar envios através de um fornecedor/canal integrado, apenas quando a automatização estiver explicitamente ativada e as regras permitirem. A aprovação humana é configurável e fica obrigatória por defeito.
+
+### Âmbito das configurações
+
+- Configurações globais por canal (WhatsApp e email), incluindo modo manual/automático.
+- Regras globais independentes por canal.
+- Exceções por conversação apenas quando necessário.
+- A exceção da conversação prevalece sobre a regra global do canal, exceto bloqueios de segurança, oposição/não contactar e limites legais ou técnicos, que nunca podem ser ultrapassados.
+- Deve ser possível consultar qual a regra efetiva aplicada e a origem da configuração (global ou exceção).
+
+### Regras de frequência a configurar
+
+- Limite diário de primeiros contactos.
+- Limite diário de mensagens/seguimentos, se aplicável.
+- Intervalo mínimo entre mensagens.
+- Intervalo entre seguimentos.
+- Número máximo de seguimentos sem resposta.
+- Dias e horários permitidos.
+- Tratamento de fins de semana e, após decisão, feriados.
+
+No modo automático, as regras são condições de execução: se alguma falhar, a mensagem não é enviada e fica adiada/suspensa com motivo registado. No modo manual, as regras geram recomendações de próxima data/hora e alertas visíveis; não enviam mensagens. A política de bloqueio de envio manual por exceder limites deve ser configurável/decidida antes da implementação.
+
+### Próximo contacto recomendado/agendado
+
+O sistema calcula a próxima data de contacto com base nas regras do canal, data e conteúdo da última comunicação, respostas recebidas, silêncio (sem interpretar automaticamente como desinteresse), compromissos assumidos, análise contextual da IA e estado da conversação. A recomendação deve incluir motivo e nível de confiança quando derivada de IA. Pedidos de não voltar a contactar, oposição, recusa inequívoca ou conversação bloqueada prevalecem e impedem qualquer recomendação de envio.
+
+### Separação técnica
+
+Manter um único modelo de conversações e mensagens. Criar uma camada de decisão/dispatch desacoplada dos fornecedores, com componentes equivalentes a `MessageDispatcher`, manipulador manual, manipulador automático e contratos/adaptadores de fornecedor. A lógica de negócio não deve depender diretamente de um fornecedor específico. A integração efetiva de cada canal é uma etapa própria; não assumir que abrir `wa.me` constitui integração de envio automático.
+
+## 5. Estado atual conhecido
 
 A análise inicial do ZIP identificou:
 
@@ -117,7 +143,7 @@ A análise inicial do ZIP identificou:
 Não assumir que estes problemas permanecem na versão atual sem os
 reproduzir.
 
-## 5. Estados funcionais propostos
+## 6. Estados funcionais propostos
 
 ### Oportunidade
 
@@ -160,185 +186,97 @@ consentimento para marketing. O modelo e os bloqueios de contacto devem
 ser validados juridicamente. Não usar mensagens não solicitadas como
 atalho para obter consentimento.
 
-## 6. Etapas de implementação
+## 7. Etapas de implementação
 
-### Etapa 0 --- Diagnóstico final
+### Etapa 0 --- Diagnóstico final (CONCLUÍDA)
 
-**Tarefas** 1. Confirmar branch e estado Git. 2. Confirmar backup da
-base de dados de desenvolvimento. 3. Inspecionar `composer.json` e
-`composer.lock`. 4. Confirmar versões PHP, Laravel, Krayin e
-dependências. 5. Inspecionar providers e estrutura do pacote Prospeção.
-6. Inspecionar migrations, Models, Controllers, Services, Requests,
-rotas, views e permissões. 7. Identificar testes e comandos para os
-executar. 8. Confirmar convenções de tradução e interface. 9. Confirmar
-timezone e configuração de filas. 10. Registar baseline e resultados.
+Baseline confirmada no repositório local: PHP 8.4.26, Composer 2.10.3, Laravel 12.66.0, Pest 3.8.6, PHPUnit 11.5.50 e MySQL. Testes baseline: Unit 1 passed (2 assertions); Feature 213 passed (435 assertions).
 
-**Testes/verificações:** aplicação arranca; comandos Laravel funcionam;
-testes existentes executam e baseline fica registada; working tree sem
-alterações não relacionadas.
+### Etapa 1 --- Conversações, mensagens, modelos e serviço (CONCLUÍDA)
 
-**Commit:**
-`docs(prospeccao): documenta baseline e plano de implementação`
+Criadas as tabelas `prospeccao_conversations` e `prospeccao_messages`, modelos `Conversation` e `Message`, relação em `Property` e `ConversationService` para obter/criar conversações, registar mensagens recebidas e rascunhos, aprovar e confirmar envio. Testes específicos: 11 passed (25 assertions).
 
-**Conclusão:** diagnóstico documentado, testes executados e commit
-criado.
+**Commit:** `161e55f8` — `Implementa conversações e mensagens na prospeção`.
 
-### Etapa 1 --- Estabilizar módulo existente
+### Etapa 2 --- Interface de consulta de conversações (CONCLUÍDA)
 
-**Tarefas** 1. Reproduzir os problemas identificados. 2. Corrigir
-atualização de telefones/emails sem perda de dados. 3. Definir deteção
-de Pessoas duplicadas. 4. Definir deteção de anúncios/imóveis
-duplicados. 5. Alinhar validações e constraints. 6. Resolver
-pipeline/etapa explicitamente, sem IDs implícitos. 7. Distinguir
-comunicação preparada de envio confirmado. 8. Rever permissões e
-validação server-side. 9. Criar testes de regressão.
+A ficha do imóvel apresenta conversações WhatsApp e email, estado e histórico cronológico de mensagens. A secção antiga de ContactLogs foi substituída na apresentação.
 
-**Testes:** contacto novo; Pessoa existente; múltiplos telefones/emails;
-anúncio repetido; vários imóveis da mesma Pessoa; campos obrigatórios;
-pipeline correto; permissões.
+**Commit:** `0a22e0bb` — `Integra conversações na ficha do imóvel`.
 
-**Commit:**
-`fix(prospeccao): estabiliza contactos e registos de imóveis`
+### Etapa 3 --- Configurações de comunicação e motor de regras de frequência (PRÓXIMA)
 
-**Conclusão:** todos os testes relevantes passam e commit criado.
+**Objetivo:** preparar o sistema para operação manual e automática antes de implementar os fluxos de gestão e envio.
 
-### Etapa 2 --- Conversações e mensagens
+**Tarefas:**
+1. Criar configurações globais independentes por canal (WhatsApp/email).
+2. Permitir selecionar modo manual ou automático por canal.
+3. Definir aprovação humana obrigatória por defeito e opção configurável para automatização, sujeita às salvaguardas acordadas.
+4. Configurar limites diários de primeiros contactos e, se aplicável, de seguimentos/mensagens.
+5. Configurar intervalos mínimos, máximo de seguimentos sem resposta, dias e horários permitidos.
+6. Permitir exceções por conversação, sem criar configurações individuais por defeito.
+7. Definir precedência: exceção da conversação sobre regra global do canal; bloqueios de segurança/oposição prevalecem sempre.
+8. Implementar serviço central que resolve as regras efetivas e decide se uma ação pode ser executada.
+9. Registar motivo de bloqueio/adiamento e configuração aplicada.
+10. Calcular a próxima data recomendada para contacto, inicialmente com regras determinísticas; integrar a avaliação contextual da IA numa etapa posterior.
 
-**Tarefas** 1. Definir relações entre prospeção, Pessoa, Lead e
-conversação. 2. Criar migrations/Models se não existir estrutura
-reutilizável. 3. Guardar mensagens individuais. 4. Guardar direção,
-canal, conteúdo, autor, data e estado. 5. Preservar histórico
-cronológico. 6. Identificar mensagens escritas pelo consultor ou
-sugeridas pela IA. 7. Evitar dados redundantes. 8. Definir retenção após
-análise jurídica. 9. Respeitar permissões do CRM.
+**Testes:** modos independentes por canal; valores globais; exceções; precedência; limites diários; intervalos; dias/horários; bloqueios por oposição; data recomendada; ausência de envio automático nesta etapa.
 
-**Testes:** criar conversa; guardar mensagem de saída e resposta;
-ordenar cronologicamente; validar relações; permissões; migrations
-up/down.
+**Commit previsto:** `feat(prospeccao): adiciona configurações e regras de comunicação`.
 
-**Commit:** `feat(prospeccao): adiciona histórico de conversações`
+### Etapa 4 --- Gestão manual de mensagens
 
-### Etapa 3 --- Interface manual
+**Tarefas:** registar mensagens recebidas; criar e editar rascunhos; aprovar mensagens pendentes; copiar texto/abrir `wa.me` ou cliente de email; confirmar manualmente mensagens enviadas; atualizar estado da conversação; apresentar recomendações de próxima abordagem com data/motivo; respeitar limites e avisos definidos na Etapa 3. Não implementar envio automático nesta etapa.
 
-**Tarefas** 1. Adicionar painel/separador de conversa na prospeção. 2.
-Mostrar histórico cronológico. 3. Permitir introduzir respostas
-recebidas. 4. Permitir escrever e editar mensagens de saída. 5. Ação
-para copiar texto. 6. Ação para abrir `wa.me` com número/texto
-codificados. 7. Exigir confirmação humana para marcar como enviado. 8.
-Distinguir rascunho, sugestão, envio declarado e resposta. 9. Permitir
-descartar sugestões. 10. Não implementar API nem leitura automática.
+**Testes:** registo, edição e estados; conteúdo enviado/recebido imutável; aprovação; confirmação manual; links; atualização de estado; recomendações e limites.
 
-**Testes:** introdução e visualização; editar/copiar/descartar; link
-correto; abrir link não marca enviado; confirmação explícita altera
-estado; números inválidos; permissões.
+**Commit previsto:** `feat(prospeccao): completa gestão manual de mensagens`.
 
-**Commit:** `feat(prospeccao): adiciona interface de conversação manual`
+### Etapa 5 --- IA para primeira abordagem
 
-### Etapa 4 --- IA para primeira abordagem
+Escolher fornecedor/modelo; criar serviço desacoplado; analisar anúncio/contexto; gerar mensagem em português europeu sem inventar factos; validar resposta; permitir regenerar, editar, aprovar e descartar; guardar metadados mínimos e minimizar dados enviados.
 
-**Tarefas** 1. Escolher fornecedor/modelo. 2. Configurar credenciais em
-ambiente. 3. Criar contrato/serviço desacoplado do fornecedor. 4.
-Analisar anúncio e contexto. 5. Definir prompt e formato estruturado. 6.
-Gerar mensagem curta, natural e em português europeu. 7. Não inventar
-características nem dados. 8. Sinalizar informação em falta e
-pressupostos. 9. Permitir regenerar, editar, aprovar e descartar. 10.
-Guardar metadados mínimos de modelo/prompt. 11. Minimizar dados
-enviados.
+**Commit previsto:** `feat(prospeccao): adiciona assistente IA para primeira abordagem`.
 
-**Testes:** anúncio completo/incompleto; não inventar factos; timeout;
-resposta malformada; formato validado; nenhuma ação de envio; aprovação
-exclusivamente humana; testes com mocks e integração controlada.
+### Etapa 6 --- IA para análise de respostas e recomendação de contacto
 
-**Commit:**
-`feat(prospeccao): adiciona assistente IA para primeira abordagem`
+Analisar histórico e contexto; identificar intenção, objeções, interesse, compromissos e oposição; atualizar resumo contextual; calcular termómetro 0–100 por conversação, com justificação, fatores e confiança; sugerir próxima resposta e data de contacto; permitir correção pelo consultor. Silêncio reduz confiança, mas não significa automaticamente desinteresse.
 
-### Etapa 5 --- IA para análise de respostas
+**Commit previsto:** `feat(prospeccao): adiciona análise IA e recomendações de seguimento`.
 
-**Tarefas** 1. Enviar anúncio, dados necessários e histórico relevante.
-2. Analisar intenção. 3. Identificar objeções, dúvidas e interesse. 4.
-Classificar resposta. 5. Gerar proposta contextualizada. 6. Recomendar
-próximo passo. 7. Sinalizar incerteza. 8. Evitar pressão, manipulação e
-promessas infundadas. 9. Permitir editar/aprovar/descartar. 10. Guardar
-sugestão e decisão.
+### Etapa 7 --- Integração de envio automático
 
-**Categorias iniciais:** interessado; pede informação; indeciso; já tem
-consultor; sem interesse; não contactar novamente; imóvel
-vendido/reservado; ambíguo; outro.
+Implementar adaptadores para os fornecedores efetivamente escolhidos; envio apenas no modo automático; aprovação humana obrigatória por defeito; agendamento/filas; idempotência; registo de resultados e falhas; receção de respostas apenas quando o fornecedor/canal suportar essa capacidade; respeitar sempre regras de frequência e bloqueios. A integração WhatsApp deve usar uma solução tecnicamente suportada e juridicamente validada.
 
-**Testes:** respostas positivas/negativas; objeção de comissão; já
-representado; pedido de informação; ambígua; oposição; contexto
-contraditório; nenhuma resposta automática; classificação e sugestão
-guardadas.
+**Testes:** mocks de fornecedor; falhas/timeouts; duplicação; limites; horários; aprovação; bloqueios; auditoria; confirmação de estado sem falsos positivos.
 
-**Commit:** `feat(prospeccao): adiciona análise IA das respostas`
+**Commit previsto:** `feat(prospeccao): integra envio automatizado por canal`.
 
-### Etapa 6 --- Qualificação e funil
+### Etapa 8 --- Planeador e acompanhamento global
 
-**Tarefas** 1. Definir critérios transparentes. 2. Separar sugestão IA
-de classificação confirmada. 3. Mostrar resumo da oportunidade. 4.
-Sugerir tarefas/próximos passos. 5. Integrar com pipeline/Lead do
-Krayin. 6. Registar reunião e resultado. 7. Guardar motivo de
-perda/recusa. 8. Fazer prevalecer oposição a qualquer sugestão da IA.
+Vista de contactos recomendados para hoje/próximos dias, mensagens pendentes de aprovação, envios agendados, ações adiadas/bloqueadas e motivos. Distinguir recomendação manual de agendamento automático.
 
-**Testes:** classificação editável; Lead coerente; tarefa/reunião;
-encerramento com motivo; bloqueio após oposição; ausência de duplicados.
+**Commit previsto:** `feat(prospeccao): adiciona planeador de contactos`.
 
-**Commit:**
-`feat(prospeccao): integra qualificação e acompanhamento no CRM`
+### Etapa 9 --- Qualificação e funil
 
-### Etapa 7 --- Quota diária
+Integrar qualificação, tarefas, reuniões, resultados e Lead do Krayin; respeitar oposição e estados de encerramento.
 
-**Objetivo:** máximo de cinco novos primeiros contactos confirmados por
-dia útil, sem envio automático.
+**Commit previsto:** `feat(prospeccao): integra qualificação e acompanhamento no CRM`.
 
-**Tarefas** 1. Confirmar timezone `Europe/Lisbon` com padrão da
-aplicação. 2. Contar primeiros contactos confirmados pelo consultor. 3.
-Limitar a cinco de segunda a sexta. 4. Não contar rascunhos, sugestões
-descartadas ou mensagens não confirmadas. 5. Não contar seguimentos. 6.
-Mostrar quota utilizada/disponível. 7. Permitir registar oportunidades
-sem contactar. 8. Nunca enviar automaticamente no dia seguinte. 9.
-Exceções administrativas apenas se decididas e auditadas.
+### Etapa 10 --- Segurança, privacidade e validação jurídica
 
-**Testes:** cinco contactos; sexto bloqueado como novo primeiro
-contacto; reinício no dia útil seguinte; fim de semana; timezone/mudança
-de hora; seguimentos excluídos; rascunhos excluídos. Decidir se feriados
-também são excluídos.
+Rever permissões, inputs, credenciais, logs, retenção, origem dos dados, autorização, oposição, bloqueios e tratamento pelo fornecedor IA/mensagens. Validar juridicamente o processo antes da utilização real.
 
-**Commit:**
-`feat(prospeccao): aplica limite operacional diário de contactos`
+**Commit previsto:** `security(prospeccao): reforça privacidade e controlo de acesso`.
 
-### Etapa 8 --- Segurança e privacidade
+### Etapa 11 --- Integração final e produção
 
-**Tarefas** 1. Rever permissões. 2. Validar inputs no servidor. 3.
-Proteger credenciais. 4. Excluir segredos e dados desnecessários dos
-logs. 5. Definir conservação/eliminação. 6. Registar origem e estado de
-autorização. 7. Implementar oposição e bloqueio. 8. Disponibilizar
-informação de privacidade. 9. Rever termos e tratamento de dados do
-fornecedor IA. 10. Validar juridicamente o processo antes da utilização
-real.
+Executar suite completa e testes ponta a ponta; testar dados fictícios, falhas, custos, backups/recuperação, configuração e deploy controlado.
 
-**Testes:** acesso negado sem permissão; inputs inválidos; segredos
-ausentes dos logs; oposição bloqueia contacto; eliminação conforme
-política; regressão e segurança básica.
+**Commit previsto:** `release(prospeccao): prepara primeira versão do assistente IA`.
 
-**Commit:**
-`security(prospeccao): reforça privacidade e controlo de acesso`
-
-### Etapa 9 --- Integração e produção
-
-**Tarefas** 1. Executar suite completa. 2. Testar manualmente com dados
-fictícios. 3. Validar ciclo completo. 4. Testar falhas IA. 5. Rever
-custos. 6. Confirmar backups/recuperação. 7. Preparar produção sem
-segredos no Git. 8. Documentar instalação/configuração/operação. 9.
-Fazer deploy controlado. 10. Monitorizar utilização inicial.
-
-**Testes:** ponta a ponta; regressão CRM; permissões; falhas IA;
-duplicação; quota; logs sem segredos; backup/recuperação.
-
-**Commit:**
-`release(prospeccao): prepara primeira versão do assistente IA`
-
-## 7. Regra obrigatória de conclusão
+## 8. Regra obrigatória de conclusão
 
 Uma etapa só fica concluída quando: 1. Código implementado e revisto. 2.
 Migrations verificadas, se aplicável. 3. Testes novos criados. 4. Testes
@@ -354,20 +292,22 @@ apenas porque o código foi escrito ou a página parece funcionar.
 
 ### Registo de progresso
 
-  Etapa                           Estado        Testes   Commit   Hash
-  ------------------------------- ------------- -------- -------- ------
-  0 --- Diagnóstico               Por iniciar   ---      ---      ---
-  1 --- Estabilização             Por iniciar   ---      ---      ---
-  2 --- Conversações              Por iniciar   ---      ---      ---
-  3 --- Interface manual          Por iniciar   ---      ---      ---
-  4 --- Primeira abordagem IA     Por iniciar   ---      ---      ---
-  5 --- Análise de respostas IA   Por iniciar   ---      ---      ---
-  6 --- Qualificação              Por iniciar   ---      ---      ---
-  7 --- Quota diária              Por iniciar   ---      ---      ---
-  8 --- Segurança/privacidade     Por iniciar   ---      ---      ---
-  9 --- Produção                  Por iniciar   ---      ---      ---
+  Etapa                                      Estado        Testes/resultado             Commit    Hash
+  ------------------------------------------ ------------- ---------------------------- --------- ----------
+  0 --- Diagnóstico final                    Concluída     Baseline registada           ---       ---
+  1 --- Conversações e serviço               Concluída     11 passed, 25 assertions     Criado    161e55f8
+  2 --- Interface de consulta                Concluída     Validação manual             Criado    0a22e0bb
+  3 --- Configurações/regras de frequência   Por iniciar   ---                          ---       ---
+  4 --- Gestão manual de mensagens           Por iniciar   ---                          ---       ---
+  5 --- Primeira abordagem IA                Por iniciar   ---                          ---       ---
+  6 --- Análise IA/recomendações             Por iniciar   ---                          ---       ---
+  7 --- Envio automatizado                   Por iniciar   ---                          ---       ---
+  8 --- Planeador de contactos               Por iniciar   ---                          ---       ---
+  9 --- Qualificação/funil                   Por iniciar   ---                          ---       ---
+  10 --- Segurança/privacidade               Por iniciar   ---                          ---       ---
+  11 --- Produção                             Por iniciar   ---                          ---       ---
 
-## 8. Convenções Git
+## 9. Convenções Git
 
 -   Usar branch própria, respeitando convenções existentes.
 -   Excluir `.env`, logs, backups, `vendor`, `node_modules` e
@@ -378,7 +318,7 @@ apenas porque o código foi escrito ou a página parece funcionar.
 -   Antes do commit, verificar `git status`, diff e staging.
 -   Depois do commit, confirmar working tree limpo.
 
-## 9. Regras para a IA
+## 10. Regras para a IA
 
 -   Nunca envia mensagens nem telefona.
 -   Nunca altera dados críticos sem confirmação.
@@ -393,7 +333,7 @@ apenas porque o código foi escrito ou a página parece funcionar.
 -   Quando houver ambiguidade, declara incerteza.
 -   A decisão final pertence sempre ao consultor.
 
-## 10. Decisões pendentes
+## 11. Decisões pendentes
 
 Resolver antes da etapa correspondente: 1. Fornecedor/modelo IA e
 custos. 2. Dados enviados ao fornecedor e retenção. 3. Critérios de
@@ -402,7 +342,7 @@ duplicação de anúncios/imóveis. 4. Exclusão ou não de feriados na quota.
 tratamento de dados. 7. Alojamento, backups e serviços necessários. 8.
 Limites de consumo IA.
 
-## 11. Método de trabalho nesta conversa
+## 12. Método de trabalho nesta conversa
 
 Para cada etapa: 1. Explicar objetivo e ficheiros a analisar/alterar. 2.
 Confirmar abordagem antes de mudanças estruturais. 3. Implementar apenas
@@ -412,113 +352,8 @@ avançar após testes aprovados e commit existente.
 
 Não presumir que o código está correto sem testes executados.
 
-## 12. Ponto de situação
+## 13. Ponto de partida
 
-**Etapa 0 — Diagnóstico final do repositório:**
-Validação técnica concluída em 06/11/2026.
+**Próxima tarefa: Etapa 3 --- Configurações de comunicação e motor de regras de frequência.**
 
-Baseline: 213 testes funcionais aprovados, sem falhas.
-
-Pendente: revisão final da documentação e criação do commit da Etapa 0.
-
-**Próxima etapa: Etapa 1 — Estabilizar o módulo existente.**
-
-Não iniciar a Etapa 1 antes de existir commit da Etapa 0.
-
-## 13. Baseline técnica do repositório
-
-**Data da validação:** 06/11/2026
-
-### 13.1. Ambiente de desenvolvimento
-
-| Componente | Versão / Configuração |
-|---|---|
-| Sistema de desenvolvimento | Windows / Laragon |
-| PHP CLI | 8.4.26 |
-| Composer | 2.10.3 |
-| Laravel | 12.66.0 |
-| Pest | 3.8.6 |
-| PHPUnit | 11.5.50 |
-| Base de dados | MySQL |
-| Nome da base de desenvolvimento | fsbo_crm |
-| Extensão PHP disponível | pdo_mysql |
-| SQLite | Não instalado/ativo |
-
-### 13.2. Repositório
-
-- Branch atual: `2.2`
-- Branch sincronizada com: `origin/2.2`
-- Último commit identificado: `7e267852`
-- Módulo de Prospeção: `packages/Webkul/Prospeccao`
-- Estrutura modular baseada em pacotes Krayin.
-- Laravel migrations distribuídas pelos pacotes e pela aplicação.
-
-### 13.3. Estado do módulo Prospeção
-
-Estrutura identificada:
-
-- Controllers: `ProspeccaoController` e `CommunicationTemplateController`.
-- Models: `Owner`, `Property`, `CommunicationTemplate` e `ContactLog`.
-- Services: `ContactLogService`, `EmailService`, `ProspeccaoLeadService`, `TemplateParserService` e `WhatsAppService`.
-- Migrations próprias no pacote.
-- Vistas para gestão de imóveis, comunicação e modelos de mensagens.
-
-Já existe um mecanismo de registo de contactos e histórico, mas ainda não existe uma estrutura explícita de conversações e mensagens individuais.
-
-### 13.4. Baseline dos testes
-
-Foi executada a suite de testes existente, sem alterações ao código durante esta validação.
-
-| Execução | Resultado |
-|---|---:|
-| Testes unitários | 1 aprovado |
-| Testes funcionais completos | 213 aprovados |
-| Asserções na suite Feature | 435 |
-| Duração da suite Feature | 58,18 segundos |
-| Falhas | 0 |
-
-Foram também executados separadamente os testes de Prospeção e Contactos, todos aprovados.
-
-Os testes específicos da Prospeção confirmaram:
-- Não sobrescrever dados de uma Pessoa existente quando existe correspondência por telefone.
-- Não sobrescrever dados de uma Pessoa existente quando existe correspondência por email.
-- Criar uma nova Pessoa quando não existe correspondência.
-
-Os testes de Contactos confirmaram:
-- Proteção contra eliminação de Pessoas associadas a imóveis.
-- Proteção contra eliminação em massa.
-- Arquivo e recuperação de Pessoas.
-
-**Nota sobre o ambiente de testes:** a configuração PHPUnit não força uma base de dados isolada. Os testes foram executados no ambiente local de desenvolvimento, após criação de uma cópia de segurança da base de dados. Esta configuração deverá ser revista numa etapa posterior, para garantir isolamento automático dos testes.
-
-### 13.5. Backup
-
-Foi criada uma cópia de segurança da base de desenvolvimento antes da execução da suite completa.
-
-Ficheiro: `backup_fsbo_crm_baseline_2026-11-06.sql`
-
-Localização: fora do repositório Git.
-
-### 13.6. Resultado do diagnóstico
-
-A baseline técnica foi validada:
-
-- Ambiente de desenvolvimento identificado.
-- Dependências e versões confirmadas.
-- Estrutura do módulo Prospeção identificada.
-- Suite de testes executada com sucesso.
-- 213 testes funcionais aprovados.
-- Nenhuma falha identificada na baseline.
-
-### 13.7. Estado da Etapa 0
-
-**Estado: validação técnica concluída.**
-
-Falta:
-
-1. Rever o diff.
-2. Confirmar que apenas os ficheiros pretendidos serão incluídos.
-3. Criar o commit da Etapa 0.
-4. Registar o hash do commit.
-
-A Etapa 1 só pode começar depois da conclusão destes pontos.
+O repositório já tem conversações e mensagens implementadas e a ficha do imóvel apresenta o histórico. Antes de desenvolver a gestão manual completa, implementar configurações globais por canal, modos manual/automático, exceções por conversação e regras de frequência. O sistema deve calcular a próxima data recomendada nos dois modos; no modo automático, as regras condicionam a execução, enquanto no manual produzem recomendações e alertas. A integração real de envio automático fica para uma etapa posterior.
