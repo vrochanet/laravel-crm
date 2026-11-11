@@ -16,6 +16,8 @@ class ProspeccaoServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
 
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'prospeccao');
+
+        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'prospeccao');
     }
 
     /**
@@ -34,5 +36,7 @@ class ProspeccaoServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(dirname(__DIR__).'/Config/menu.php', 'menu.admin');
 
         $this->mergeConfigFrom(dirname(__DIR__).'/Config/acl.php', 'acl');
+
+        $this->mergeConfigFrom(dirname(__DIR__).'/Config/system.php', 'core_config');
     }
 }
