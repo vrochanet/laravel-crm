@@ -41,5 +41,14 @@ class Property extends Model
     {
         return $this->hasMany(Conversation::class);
     }
+
+    public function contactRestrictions(): HasMany
+    {
+        return $this->hasMany(
+            ContactRestriction::class,
+            'person_id',
+            'person_id'
+        );
+    }
 }
 
