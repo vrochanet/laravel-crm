@@ -13,7 +13,6 @@ function communicationConfigDefaults(): array
         'enabled' => 1,
         'mode' => 'manual',
         'approval_required' => 1,
-        'max_first_contacts_per_day' => 5,
         'min_interval_hours' => 24,
         'follow_up_interval_days' => 4,
         'max_follow_ups' => 3,
@@ -46,7 +45,6 @@ it('returns the default settings for WhatsApp', function () {
             'enabled' => true,
             'mode' => 'manual',
             'approval_required' => true,
-            'max_first_contacts_per_day' => 5,
             'min_interval_hours' => 24,
             'follow_up_interval_days' => 4,
             'max_follow_ups' => 3,
@@ -67,13 +65,11 @@ it('converts boolean and numeric settings to the correct types', function () {
     $settings = communicationConfigService([
         'enabled' => '0',
         'approval_required' => '0',
-        'max_first_contacts_per_day' => '8',
         'min_interval_hours' => '12',
     ])->get('whatsapp');
 
     expect($settings['enabled'])->toBeFalse()
         ->and($settings['approval_required'])->toBeFalse()
-        ->and($settings['max_first_contacts_per_day'])->toBe(8)
         ->and($settings['min_interval_hours'])->toBe(12);
 });
 
@@ -93,7 +89,6 @@ it('rejects invalid frequency settings', function (string $field, int $value) {
         $field => $value,
     ])->get('whatsapp'))->toThrow(InvalidArgumentException::class);
 })->with([
-    ['max_first_contacts_per_day', -1],
     ['min_interval_hours', 0],
     ['follow_up_interval_days', 0],
     ['max_follow_ups', -1],

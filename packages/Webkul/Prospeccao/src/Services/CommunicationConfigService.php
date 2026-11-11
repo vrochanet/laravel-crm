@@ -25,7 +25,6 @@ class CommunicationConfigService
             'enabled' => (bool) $this->value($prefix.'enabled'),
             'mode' => (string) $this->value($prefix.'mode'),
             'approval_required' => (bool) $this->value($prefix.'approval_required'),
-            'max_first_contacts_per_day' => (int) $this->value($prefix.'max_first_contacts_per_day'),
             'min_interval_hours' => (int) $this->value($prefix.'min_interval_hours'),
             'follow_up_interval_days' => (int) $this->value($prefix.'follow_up_interval_days'),
             'max_follow_ups' => (int) $this->value($prefix.'max_follow_ups'),
@@ -50,8 +49,7 @@ class CommunicationConfigService
         }
 
         if (
-            $settings['max_first_contacts_per_day'] < 0
-            || $settings['min_interval_hours'] < 1
+            $settings['min_interval_hours'] < 1
             || $settings['follow_up_interval_days'] < 1
             || $settings['max_follow_ups'] < 0
         ) {
