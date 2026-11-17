@@ -10,8 +10,8 @@ function prospeccaoRegressionData(array $overrides = []): array
 {
     return array_merge([
         'owner_name' => 'Novo nome de teste',
-        'phone' => '351910'.bin2hex(random_bytes(3)),
-        'email' => 'novo-'.bin2hex(random_bytes(3)).'@example.invalid',
+        'phone' => '351910' . bin2hex(random_bytes(3)),
+        'email' => 'novo-' . bin2hex(random_bytes(3)) . '@example.invalid',
         'property_type' => 'Apartamento',
         'locality' => 'Viseu',
         'asking_price' => 150000,
@@ -27,18 +27,19 @@ function prospeccaoRegressionPerson(array $overrides = [])
         'name' => 'Nome original',
         'user_id' => getDefaultAdmin()->id,
         'emails' => [
-            ['value' => 'original-'.bin2hex(random_bytes(3)).'@example.invalid', 'label' => 'work'],
-            ['value' => 'alternativo-'.bin2hex(random_bytes(3)).'@example.invalid', 'label' => 'home'],
+            ['value' => 'original-' . bin2hex(random_bytes(3)) . '@example.invalid', 'label' => 'work'],
+            ['value' => 'alternativo-' . bin2hex(random_bytes(3)) . '@example.invalid', 'label' => 'home'],
         ],
         'contact_numbers' => [
-            ['value' => '351920'.bin2hex(random_bytes(3)), 'label' => 'mobile'],
-            ['value' => '351930'.bin2hex(random_bytes(3)), 'label' => 'home'],
+            ['value' => '351920' . bin2hex(random_bytes(3)), 'label' => 'mobile'],
+            ['value' => '351930' . bin2hex(random_bytes(3)), 'label' => 'home'],
         ],
     ], $overrides));
 }
 
 beforeEach(function () {
     securityTestPipeline();
+    auth()->guard('user')->login(getDefaultAdmin());
 });
 
 it('does not overwrite an existing person when matching by phone', function () {
@@ -50,7 +51,7 @@ it('does not overwrite an existing person when matching by phone', function () {
 
     $data = prospeccaoRegressionData([
         'phone' => $originalPhones[0]['value'],
-        'email' => 'different-'.bin2hex(random_bytes(3)).'@example.invalid',
+        'email' => 'different-' . bin2hex(random_bytes(3)) . '@example.invalid',
         'owner_name' => 'Nome que nao deve substituir o original',
     ]);
 
@@ -72,7 +73,7 @@ it('does not overwrite an existing person when matching by email', function () {
     $originalPhones = $person->contact_numbers;
 
     $data = prospeccaoRegressionData([
-        'phone' => '351940'.bin2hex(random_bytes(3)),
+        'phone' => '351940' . bin2hex(random_bytes(3)),
         'email' => $originalEmails[0]['value'],
         'owner_name' => 'Outro nome que nao deve substituir o original',
     ]);

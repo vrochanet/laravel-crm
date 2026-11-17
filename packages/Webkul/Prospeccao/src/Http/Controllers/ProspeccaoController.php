@@ -3,7 +3,7 @@
 namespace Webkul\Prospeccao\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Webkul\Admin\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use Webkul\Prospeccao\Models\CommunicationTemplate;
 use Webkul\Prospeccao\Models\Property;
@@ -15,12 +15,23 @@ use Webkul\Prospeccao\Models\Conversation;
 use Webkul\Prospeccao\Models\Message;
 use Webkul\Prospeccao\Services\CommunicationDecisionService;
 use Webkul\Prospeccao\Services\ConversationService;
+use Webkul\Prospeccao\Services\CommunicationConfigService;
 
 class ProspeccaoController extends Controller
 {
     public function index()
     {
-        $properties = Property::with(['person', 'lead'])
+        $userIds = bouncer()->getAuthorizedUserIds();
+
+        $query = Property::with(['person', 'lead']);
+
+        if ($userIds !== null) {
+            $query->whereHas('lead', function ($leadQuery) use ($userIds) {
+                $leadQuery->whereIn('user_id', $userIds);
+            });
+        }
+
+        $properties = $query
             ->latest()
             ->paginate(15);
 
@@ -29,8 +40,10 @@ class ProspeccaoController extends Controller
 
     public function show(int $id)
     {
-        $property = Property::with(['person', 'lead', 'conversations.messages',])
-            ->findOrFail($id);
+        $property = $this->findAuthorizedProperty($id, [
+            'person',
+            'conversations.messages',
+        ]);
 
         $templates = CommunicationTemplate::query()
             ->active()
@@ -43,8 +56,7 @@ class ProspeccaoController extends Controller
 
     public function edit(int $id)
     {
-        $property = Property::with(['person', 'lead'])
-            ->findOrFail($id);
+        $property = $this->findAuthorizedProperty($id, ['person']);
 
         return view('prospeccao::edit', compact('property'));
     }
@@ -87,8 +99,7 @@ class ProspeccaoController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        $property = Property::with('person')
-            ->findOrFail($id);
+        $property = $this->findAuthorizedProperty($id, ['person']);
 
         $property->update([
             'property_type' => $data['property_type'] ?? null,
@@ -130,7 +141,7 @@ class ProspeccaoController extends Controller
 
     public function prepareCommunication(Request $request, int $id, ContactLogService $contactLogService)
     {
-        $property = Property::with('person')->findOrFail($id);
+        $property = $this->findAuthorizedProperty($id, ['person']);
 
         $data = $request->validate([
             'template_id' => ['required', 'integer', 'exists:prospeccao_communication_templates,id'],
@@ -174,7 +185,7 @@ class ProspeccaoController extends Controller
         ConversationService $conversationService,
         CommunicationConfigService $communicationConfig
     ) {
-        $property = Property::with('person')->findOrFail($id);
+        $property = $this->findAuthorizedProperty($id, ['person']);
 
         $data = $request->validate([
             'template_id' => ['required', 'integer', 'exists:prospeccao_communication_templates,id'],
@@ -253,8 +264,12 @@ class ProspeccaoController extends Controller
         int $messageId,
         ConversationService $conversationService
     ) {
-        $message = Message::with('conversation.property')
+        $message = Message::with('conversation.property.lead')
             ->findOrFail($messageId);
+
+        $this->preventUnauthorizedAccess(
+            $message->conversation?->property?->lead?->user_id
+        );
 
         try {
             $conversationService->approve($message);
@@ -273,8 +288,12 @@ class ProspeccaoController extends Controller
         int $messageId,
         ConversationService $conversationService
     ) {
-        $message = Message::with('conversation')
+        $message = Message::with('conversation.property.lead')
             ->findOrFail($messageId);
+
+        $this->preventUnauthorizedAccess(
+            $message->conversation?->property?->lead?->user_id
+        );
 
         try {
             $conversationService->confirmSent($message);
@@ -296,8 +315,12 @@ class ProspeccaoController extends Controller
         WhatsAppService $whatsAppService,
         EmailService $emailService
     ) {
-        $message = Message::with('conversation.property.person')
+        $message = Message::with('conversation.property.person', 'conversation.property.lead')
             ->findOrFail($messageId);
+
+        $this->preventUnauthorizedAccess(
+            $message->conversation?->property?->lead?->user_id
+        );
 
         $conversation = $message->conversation;
         $property = $conversation->property;
@@ -369,6 +392,16 @@ class ProspeccaoController extends Controller
                 $message->body
             )
         );
+    }
+
+    protected function findAuthorizedProperty(int $id, array $relations = []): Property
+    {
+        $property = Property::with(array_merge($relations, ['lead']))
+            ->findOrFail($id);
+
+        $this->preventUnauthorizedAccess($property->lead?->user_id);
+
+        return $property;
     }
 
 }

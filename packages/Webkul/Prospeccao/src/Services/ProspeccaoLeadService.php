@@ -20,12 +20,21 @@ class ProspeccaoLeadService
     public function create(array $data): array
     {
         return DB::transaction(function () use ($data) {
-            $person = $this->findOrCreatePerson($data);
+            $userId = auth()->guard('user')->id();
+
+            if (!$userId) {
+                throw new \RuntimeException(
+                    'É necessário um consultor autenticado para criar uma prospeção.'
+                );
+            }
+
+            $person = $this->findOrCreatePerson($data, $userId);
 
             $lead = $this->leadRepository->create([
                 'entity_type' => 'leads',
                 'title' => $this->buildLeadTitle($data),
                 'person_id' => $person->id,
+                'user_id' => $userId,
                 'description' => $data['notes'] ?? null,
             ]);
 
@@ -48,15 +57,17 @@ class ProspeccaoLeadService
     }
 
     /**
-     * Reutiliza uma pessoa existente sem alterar os seus dados pessoais.
+     * Reutiliza uma pessoa existente do mesmo consultor.
      */
-    protected function findOrCreatePerson(array $data)
+    protected function findOrCreatePerson(array $data, int $userId)
     {
         $phone = trim($data['phone'] ?? '');
         $email = strtolower(trim($data['email'] ?? ''));
 
+        $query = $this->personRepository->where('user_id', $userId);
+
         if ($phone !== '') {
-            $person = $this->personRepository
+            $person = (clone $query)
                 ->whereJsonContains('contact_numbers', [
                     ['value' => $phone],
                 ])
@@ -68,7 +79,7 @@ class ProspeccaoLeadService
         }
 
         if ($email !== '') {
-            $person = $this->personRepository
+            $person = (clone $query)
                 ->whereJsonContains('emails', [
                     ['value' => $email],
                 ])
@@ -82,6 +93,7 @@ class ProspeccaoLeadService
         return $this->personRepository->create([
             'entity_type' => 'persons',
             'name' => $data['owner_name'],
+            'user_id' => $userId,
             'emails' => $email !== '' ? [
                 [
                     'value' => $email,
@@ -105,6 +117,6 @@ class ProspeccaoLeadService
         $propertyType = $data['property_type'] ?? 'Imóvel';
         $locality = $data['locality'] ?? '';
 
-        return trim($propertyType.' '.$locality);
+        return trim($propertyType . ' ' . $locality);
     }
 }
