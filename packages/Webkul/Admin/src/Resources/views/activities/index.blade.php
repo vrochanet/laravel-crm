@@ -1,4 +1,4 @@
-﻿<x-admin::layouts>
+<x-admin::layouts>
     <x-slot:title>
         {{ menu()->getLabel('activities', 'admin::app.activities.index.title') }}
     </x-slot>

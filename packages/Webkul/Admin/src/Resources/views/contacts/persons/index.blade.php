@@ -1,4 +1,4 @@
-﻿<x-admin::layouts>
+<x-admin::layouts>
     <x-slot:title>
         {{ menu()->getLabel('contacts.persons', 'admin::app.contacts.persons.index.title') }}
     </x-slot>

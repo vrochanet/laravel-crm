@@ -1,4 +1,4 @@
-﻿@props(['isMultiRow' => false])
+@props(['isMultiRow' => false])
 
 <v-datagrid-table
     :is-loading="isLoading"
