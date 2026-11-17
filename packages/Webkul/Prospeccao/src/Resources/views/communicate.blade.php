@@ -35,7 +35,6 @@
 
         <form id="prospeccao-communicate-form" method="POST"
             action="{{ route('admin.prospeccao.communicate.send', $property->id) }}"
-            target="_blank"
             class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
             @csrf
 
@@ -66,23 +65,15 @@
                 </a>
                 <button type="submit" class="primary-button">
                     @if ($channel === 'whatsapp')
-                        Confirmar e abrir WhatsApp
+                        Guardar rascunho WhatsApp para revisão
                     @else
-                        Confirmar e abrir email
+                        Guardar rascunho de email para revisão
                     @endif
                 </button>
             </div>
         </form>
     </div>
 
-    <script>
-        document.getElementById('prospeccao-communicate-form')?.addEventListener('submit', function () {
-            // Mantém esta aba no CRM (ficha do imóvel); o WhatsApp/email abre na nova aba.
-            setTimeout(function () {
-                window.location.href = @json(route('admin.prospeccao.show', $property->id));
-            }, 400);
-        });
-    </script>
 </x-admin::layouts>
 
 

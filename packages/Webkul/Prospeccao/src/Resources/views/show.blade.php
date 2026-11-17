@@ -109,14 +109,14 @@
                 <div>
                     <dt class="text-sm text-gray-500">Telefone</dt>
                     <dd class="mt-1 text-gray-800 dark:text-white">
-                        {{ collect($property->person?->contact_numbers ?? [])->pluck('value')->filter()->first() ?: 'Sem telefone registado' }}
+                        {{ collect($property->person?->contact_numbers ?? [])->pluck('value')->filter()->first() ?:'Sem telefone registado' }}
                     </dd>
                 </div>
 
                 <div>
                     <dt class="text-sm text-gray-500">Email</dt>
                     <dd class="mt-1 break-all text-gray-800 dark:text-white">
-                        {{ collect($property->person?->emails ?? [])->pluck('value')->filter()->first() ?: 'Sem email registado' }}
+                        {{ collect($property->person?->emails ?? [])->pluck('value')->filter()->first() ?:'Sem email registado' }}
                     </dd>
                 </div>
             </dl>
@@ -194,13 +194,15 @@
                         @endphp
 
                         @if ($conversation)
-                            <section class="border-t border-gray-200 pt-4 first:border-0 first:pt-0 dark:border-gray-700">
+                            <section
+                                class="border-t border-gray-200 pt-4 first:border-0 first:pt-0 dark:border-gray-700">
                                 <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                                     <h3 class="font-semibold text-gray-800 dark:text-white">
                                         {{ $channelLabel }}
                                     </h3>
 
-                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                    <span
+                                        class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                                         {{ [
                                             'active' => 'Ativa',
                                             'waiting_reply' => 'A aguardar resposta',
@@ -217,9 +219,11 @@
                                 @else
                                     <div class="flex flex-col gap-3">
                                         @foreach ($conversation->messages as $message)
-                                            <div class="max-w-3xl rounded-lg border border-gray-200 p-4 dark:border-gray-700
+                                            <div
+                                                class="max-w-3xl rounded-lg border border-gray-200 p-4 dark:border-gray-700
                                                 {{ $message->direction === 'outgoing' ? 'ml-auto bg-blue-50 dark:bg-gray-800' : 'mr-auto bg-gray-50 dark:bg-gray-800' }}">
-                                                <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                                <div
+                                                    class="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                                                     <span class="font-semibold">
                                                         {{ $message->direction === 'outgoing' ? 'Enviada' : 'Recebida' }}
                                                     </span>
@@ -262,6 +266,39 @@
                                                 <p class="whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">
                                                     {{ $message->body }}
                                                 </p>
+                                                @if ($message->direction === 'outgoing')
+                                                    <div class="mt-3 flex flex-wrap justify-end gap-2">
+                                                        @if (in_array($message->status, ['draft', 'pending_review']))
+                                                            <form method="POST"
+                                                                action="{{ route('admin.prospeccao.messages.approve', $message->id) }}">
+                                                                @csrf
+                                                                <button type="submit" class="primary-button">
+                                                                    Aprovar mensagem
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        @if ($message->status === 'approved' && $message->opened_at !== null)
+                                                            <form method="POST"
+                                                                action="{{ route('admin.prospeccao.messages.open', $message->id) }}">
+                                                                @csrf
+                                                                <button type="submit" class="primary-button">
+                                                                    Abrir
+                                                                    {{ $conversation->channel === 'whatsapp' ? 'WhatsApp' : 'Email' }}
+                                                                </button>
+                                                            </form>
+
+                                                            <form method="POST"
+                                                                action="{{ route('admin.prospeccao.messages.confirm-sent', $message->id) }}"
+                                                                onsubmit="return confirm('Confirma que enviou efetivamente esta mensagem?');">
+                                                                @csrf
+                                                                <button type="submit" class="secondary-button">
+                                                                    Confirmar envio
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </div>

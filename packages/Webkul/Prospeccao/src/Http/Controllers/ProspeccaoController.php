@@ -11,6 +11,10 @@ use Webkul\Prospeccao\Services\ContactLogService;
 use Webkul\Prospeccao\Services\EmailService;
 use Webkul\Prospeccao\Services\ProspeccaoLeadService;
 use Webkul\Prospeccao\Services\WhatsAppService;
+use Webkul\Prospeccao\Models\Conversation;
+use Webkul\Prospeccao\Models\Message;
+use Webkul\Prospeccao\Services\CommunicationDecisionService;
+use Webkul\Prospeccao\Services\ConversationService;
 
 class ProspeccaoController extends Controller
 {
@@ -162,12 +166,13 @@ class ProspeccaoController extends Controller
         ]);
     }
 
+
+
     public function sendCommunication(
         Request $request,
         int $id,
-        ContactLogService $contactLogService,
-        WhatsAppService $whatsAppService,
-        EmailService $emailService
+        ConversationService $conversationService,
+        CommunicationConfigService $communicationConfig
     ) {
         $property = Property::with('person')->findOrFail($id);
 
@@ -178,23 +183,150 @@ class ProspeccaoController extends Controller
                 Rule::in([
                     CommunicationTemplate::CHANNEL_WHATSAPP,
                     CommunicationTemplate::CHANNEL_EMAIL,
-                ])
+                ]),
             ],
             'subject' => ['nullable', 'required_if:channel,email', 'string', 'max:255'],
             'body' => ['required', 'string'],
         ]);
 
-        $template = CommunicationTemplate::findOrFail($data['template_id']);
+        $template = CommunicationTemplate::query()
+            ->active()
+            ->findOrFail($data['template_id']);
 
-        $contactLogService->log(
-            property: $property,
-            channel: $data['channel'],
+        if (
+            ($data['channel'] === CommunicationTemplate::CHANNEL_WHATSAPP && !$template->supportsWhatsApp())
+            || ($data['channel'] === CommunicationTemplate::CHANNEL_EMAIL && !$template->supportsEmail())
+        ) {
+            return redirect()
+                ->route('admin.prospeccao.show', $property->id)
+                ->with('error', 'Este modelo não está disponível para o canal selecionado.');
+        }
+
+        if ($data['channel'] === CommunicationTemplate::CHANNEL_WHATSAPP) {
+            $contact = collect($property->person?->contact_numbers ?? [])
+                ->pluck('value')
+                ->filter()
+                ->first();
+        } else {
+            $contact = collect($property->person?->emails ?? [])
+                ->pluck('value')
+                ->filter()
+                ->first();
+        }
+
+        if (!$contact) {
+            return redirect()
+                ->route('admin.prospeccao.show', $property->id)
+                ->with('error', 'O contacto não tem os dados necessários para este canal.');
+        }
+
+        $conversation = $conversationService->getOrCreate(
+            $property,
+            $data['channel']
+        );
+
+        $message = $conversationService->createOutgoingDraft(
+            conversation: $conversation,
             body: $data['body'],
+            source: Message::SOURCE_TEMPLATE,
             subject: $data['subject'] ?? null,
             template: $template
         );
 
-        if ($data['channel'] === CommunicationTemplate::CHANNEL_WHATSAPP) {
+        $settings = $communicationConfig->get($data['channel']);
+
+        $approvalRequired = $conversation->approval_required_override
+            ?? $settings['approval_required'];
+
+        if (!$approvalRequired) {
+            $conversationService->approve($message);
+        }
+
+        return redirect()
+            ->route('admin.prospeccao.show', $property->id)
+            ->with('success', $approvalRequired
+                ? 'Rascunho guardado. Aguarda aprovação antes do envio.'
+                : 'Mensagem guardada e aprovada. Pode avançar para o envio manual.');
+    }
+
+    public function approveMessage(
+        int $messageId,
+        ConversationService $conversationService
+    ) {
+        $message = Message::with('conversation.property')
+            ->findOrFail($messageId);
+
+        try {
+            $conversationService->approve($message);
+        } catch (\LogicException $exception) {
+            return redirect()
+                ->route('admin.prospeccao.show', $message->conversation->property_id)
+                ->with('error', 'Esta mensagem não pode ser aprovada no estado atual.');
+        }
+
+        return redirect()
+            ->route('admin.prospeccao.show', $message->conversation->property_id)
+            ->with('success', 'Mensagem aprovada. Pode agora avaliar as condições de envio.');
+    }
+
+    public function confirmMessageSent(
+        int $messageId,
+        ConversationService $conversationService
+    ) {
+        $message = Message::with('conversation')
+            ->findOrFail($messageId);
+
+        try {
+            $conversationService->confirmSent($message);
+        } catch (\LogicException $exception) {
+            return redirect()
+                ->route('admin.prospeccao.show', $message->conversation->property_id)
+                ->with('error', 'Só é possível confirmar o envio de mensagens aprovadas.');
+        }
+
+        return redirect()
+            ->route('admin.prospeccao.show', $message->conversation->property_id)
+            ->with('success', 'Envio registado no histórico.');
+    }
+
+
+    public function openMessage(
+        int $messageId,
+        CommunicationDecisionService $decisionService,
+        WhatsAppService $whatsAppService,
+        EmailService $emailService
+    ) {
+        $message = Message::with('conversation.property.person')
+            ->findOrFail($messageId);
+
+        $conversation = $message->conversation;
+        $property = $conversation->property;
+
+        if (
+            $message->direction !== Message::DIRECTION_OUTGOING
+            || $message->status !== Message::STATUS_APPROVED
+        ) {
+            return redirect()
+                ->route('admin.prospeccao.show', $property->id)
+                ->with('error', 'A mensagem tem de estar aprovada antes de abrir o canal de envio.');
+        }
+
+        $decision = $decisionService->evaluate($conversation);
+
+        if (!$decision['allowed']) {
+            $error = 'Envio não permitido. Motivo: ' . $decision['reason'];
+
+            if ($decision['next_action_at']) {
+                $error .= '. Próxima oportunidade: '
+                    . $decision['next_action_at']->format('d/m/Y H:i');
+            }
+
+            return redirect()
+                ->route('admin.prospeccao.show', $property->id)
+                ->with('error', $error);
+        }
+
+        if ($conversation->channel === Conversation::CHANNEL_WHATSAPP) {
             $phone = collect($property->person?->contact_numbers ?? [])
                 ->pluck('value')
                 ->filter()
@@ -203,11 +335,15 @@ class ProspeccaoController extends Controller
             if (!$phone) {
                 return redirect()
                     ->route('admin.prospeccao.show', $property->id)
-                    ->with('error', 'O contacto nÃ£o tem telefone registado.');
+                    ->with('error', 'O contacto não tem telefone registado.');
             }
 
+            $message->update([
+                'opened_at' => now(),
+            ]);
+
             return redirect()->away(
-                $whatsAppService->buildUrl($phone, $data['body'])
+                $whatsAppService->buildUrl($phone, $message->body)
             );
         }
 
@@ -219,73 +355,20 @@ class ProspeccaoController extends Controller
         if (!$email) {
             return redirect()
                 ->route('admin.prospeccao.show', $property->id)
-                ->with('error', 'O contacto nÃ£o tem email registado.');
+                ->with('error', 'O contacto não tem email registado.');
         }
 
+        $message->update([
+            'opened_at' => now(),
+        ]);
+
         return redirect()->away(
-            $emailService->buildUrl($email, $data['subject'] ?? '', $data['body'])
+            $emailService->buildUrl(
+                $email,
+                $message->subject ?? '',
+                $message->body
+            )
         );
     }
 
-    public function whatsapp(int $id, WhatsAppService $whatsAppService)
-    {
-        $property = Property::with('person')
-            ->findOrFail($id);
-
-        $phone = collect($property->person?->contact_numbers ?? [])
-            ->pluck('value')
-            ->filter()
-            ->first();
-
-        if (!$phone) {
-            return redirect()
-                ->route('admin.prospeccao.show', $property->id)
-                ->with('error', 'O contacto nÃ£o tem telefone registado.');
-        }
-
-        $message = sprintf(
-            'Bom dia, %s. O meu nome Ã© VÃ­tor Rocha, consultor imobiliÃ¡rio da RE/MAX. Encontrei o seu anÃºncio de %s%s e gostaria de saber se estaria disponÃ­vel para conversar sobre a venda do imÃ³vel. Obrigado.',
-            $property->person?->name ?? '',
-            $property->property_type ?? 'imÃ³vel',
-            $property->locality ? ' em ' . $property->locality : ''
-        );
-
-        return redirect()->away(
-            $whatsAppService->buildUrl($phone, $message)
-        );
-    }
-
-    public function email(int $id, EmailService $emailService)
-    {
-        $property = Property::with('person')
-            ->findOrFail($id);
-
-        $email = collect($property->person?->emails ?? [])
-            ->pluck('value')
-            ->filter()
-            ->first();
-
-        if (!$email) {
-            return redirect()
-                ->route('admin.prospeccao.show', $property->id)
-                ->with('error', 'O contacto nÃ£o tem email registado.');
-        }
-
-        $subject = sprintf(
-            'Contacto sobre o seu anÃºncio%s',
-            $property->locality ? ' em ' . $property->locality : ''
-        );
-
-        $message = sprintf(
-            "Bom dia, %s.\n\nO meu nome Ã© VÃ­tor Rocha, consultor imobiliÃ¡rio da RE/MAX. Encontrei o seu anÃºncio de %s%s e gostaria de saber se estaria disponÃ­vel para conversar sobre a venda do imÃ³vel.\n\nObrigado,\nVÃ­tor Rocha\nRE/MAX",
-            $property->person?->name ?? '',
-            $property->property_type ?? 'imÃ³vel',
-            $property->locality ? ' em ' . $property->locality : ''
-        );
-
-        return redirect()->away(
-            $emailService->buildUrl($email, $subject, $message)
-        );
-    }
 }
-

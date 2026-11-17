@@ -37,6 +37,7 @@ class Message extends Model
     protected $fillable = [
         'conversation_id',
         'user_id',
+        'template_id',
         'direction',
         'status',
         'source',
@@ -45,12 +46,14 @@ class Message extends Model
         'approved_at',
         'sent_at',
         'received_at',
+        'opened_at',
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
         'sent_at' => 'datetime',
         'received_at' => 'datetime',
+        'opened_at' => 'datetime',
     ];
 
     public function conversation(): BelongsTo
@@ -61,5 +64,10 @@ class Message extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(UserProxy::modelClass());
+    }
+
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(CommunicationTemplate::class, 'template_id');
     }
 }

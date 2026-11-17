@@ -8,6 +8,7 @@ use LogicException;
 use Webkul\Prospeccao\Models\Conversation;
 use Webkul\Prospeccao\Models\Message;
 use Webkul\Prospeccao\Models\Property;
+use Webkul\Prospeccao\Models\CommunicationTemplate;
 
 class ConversationService
 {
@@ -18,10 +19,12 @@ class ConversationService
         Property $property,
         string $channel
     ): Conversation {
-        if (! in_array($channel, [
-            Conversation::CHANNEL_WHATSAPP,
-            Conversation::CHANNEL_EMAIL,
-        ], true)) {
+        if (
+            !in_array($channel, [
+                Conversation::CHANNEL_WHATSAPP,
+                Conversation::CHANNEL_EMAIL,
+            ], true)
+        ) {
             throw new InvalidArgumentException('Invalid conversation channel.');
         }
 
@@ -70,13 +73,16 @@ class ConversationService
         Conversation $conversation,
         string $body,
         string $source = Message::SOURCE_MANUAL,
-        ?string $subject = null
+        ?string $subject = null,
+        ?CommunicationTemplate $template = null
     ): Message {
-        if (! in_array($source, [
-            Message::SOURCE_MANUAL,
-            Message::SOURCE_AI,
-            Message::SOURCE_TEMPLATE,
-        ], true)) {
+        if (
+            !in_array($source, [
+                Message::SOURCE_MANUAL,
+                Message::SOURCE_AI,
+                Message::SOURCE_TEMPLATE,
+            ], true)
+        ) {
             throw new InvalidArgumentException('Invalid message source.');
         }
 
@@ -89,6 +95,7 @@ class ConversationService
             'source' => $source,
             'subject' => $subject,
             'body' => $body,
+            'template_id' => $template?->id,
         ]);
     }
 
@@ -99,7 +106,7 @@ class ConversationService
     {
         if (
             $message->direction !== Message::DIRECTION_OUTGOING
-            || ! in_array($message->status, [
+            || !in_array($message->status, [
                 Message::STATUS_DRAFT,
                 Message::STATUS_PENDING_REVIEW,
             ], true)
@@ -123,8 +130,11 @@ class ConversationService
         if (
             $message->direction !== Message::DIRECTION_OUTGOING
             || $message->status !== Message::STATUS_APPROVED
+            || $message->opened_at === null
         ) {
-            throw new LogicException('Only approved messages can be marked as sent.');
+            throw new LogicException(
+                'Only approved and opened messages can be marked as sent.'
+            );
         }
 
         return DB::transaction(function () use ($message) {

@@ -11,15 +11,15 @@ Route::middleware(['web', 'admin_locale', 'user'])
         Route::controller(CommunicationTemplateController::class)
             ->prefix('prospeccao/templates')
             ->group(function () {
-                Route::get('/', 'index')->name('admin.prospeccao.templates.index');
-                Route::get('/create', 'create')->name('admin.prospeccao.templates.create');
-                Route::post('/', 'store')->name('admin.prospeccao.templates.store');
-                Route::get('/{id}/edit', 'edit')->name('admin.prospeccao.templates.edit');
-                Route::put('/{id}', 'update')->name('admin.prospeccao.templates.update');
-                Route::post('/{id}/duplicate', 'duplicate')->name('admin.prospeccao.templates.duplicate');
-                Route::post('/{id}/deactivate', 'deactivate')->name('admin.prospeccao.templates.deactivate');
-                Route::post('/{id}/activate', 'activate')->name('admin.prospeccao.templates.activate');
-            });
+            Route::get('/', 'index')->name('admin.prospeccao.templates.index');
+            Route::get('/create', 'create')->name('admin.prospeccao.templates.create');
+            Route::post('/', 'store')->name('admin.prospeccao.templates.store');
+            Route::get('/{id}/edit', 'edit')->name('admin.prospeccao.templates.edit');
+            Route::put('/{id}', 'update')->name('admin.prospeccao.templates.update');
+            Route::post('/{id}/duplicate', 'duplicate')->name('admin.prospeccao.templates.duplicate');
+            Route::post('/{id}/deactivate', 'deactivate')->name('admin.prospeccao.templates.deactivate');
+            Route::post('/{id}/activate', 'activate')->name('admin.prospeccao.templates.activate');
+        });
 
         Route::controller(ProspeccaoController::class)->group(function () {
             Route::get('prospeccao', 'index')->name('admin.prospeccao.index');
@@ -34,9 +34,16 @@ Route::middleware(['web', 'admin_locale', 'user'])
             Route::post('prospeccao/{id}/communicate/send', 'sendCommunication')
                 ->name('admin.prospeccao.communicate.send');
 
-            Route::get('prospeccao/{id}/whatsapp', 'whatsapp')->name('admin.prospeccao.whatsapp');
-            Route::get('prospeccao/{id}/email', 'email')->name('admin.prospeccao.email');
             Route::get('prospeccao/{id}', 'show')->name('admin.prospeccao.show');
+
+            Route::post('prospeccao/messages/{messageId}/approve', 'approveMessage')
+                ->name('admin.prospeccao.messages.approve');
+
+            Route::post('prospeccao/messages/{messageId}/open', 'openMessage')
+                ->name('admin.prospeccao.messages.open');
+
+            Route::post('prospeccao/messages/{messageId}/confirm-sent', 'confirmMessageSent')
+                ->name('admin.prospeccao.messages.confirm-sent');
         });
     });
 

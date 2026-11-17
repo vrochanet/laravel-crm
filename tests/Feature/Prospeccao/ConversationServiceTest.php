@@ -5,6 +5,7 @@ use Webkul\Prospeccao\Models\Conversation;
 use Webkul\Prospeccao\Models\Message;
 use Webkul\Prospeccao\Models\Property;
 use Webkul\Prospeccao\Services\ConversationService;
+use Webkul\Prospeccao\Models\CommunicationTemplate;
 
 uses(DatabaseTransactions::class);
 
@@ -156,6 +157,7 @@ it('confirms sent messages and updates the last message date', function () {
 
     $message = $service->createOutgoingDraft($conversation, 'Mensagem manual');
     $service->approve($message);
+    $message->update(['opened_at' => now()]);
 
     $sent = $service->confirmSent($message);
 
@@ -175,4 +177,34 @@ it('rejects sending messages that have not been approved', function () {
 
     expect(fn () => $service->confirmSent($message))
         ->toThrow(LogicException::class);
+});
+
+it('associates an outgoing message with its communication template', function () {
+    $service = app(ConversationService::class);
+
+    $conversation = $service->getOrCreate(
+        conversationTestProperty(),
+        Conversation::CHANNEL_WHATSAPP
+    );
+
+    $template = CommunicationTemplate::create([
+        'name' => 'Primeiro contacto',
+        'stage' => 'initial',
+        'channel' => CommunicationTemplate::CHANNEL_WHATSAPP,
+        'subject' => null,
+        'body' => 'Mensagem de teste',
+        'is_active' => true,
+    ]);
+
+    $message = $service->createOutgoingDraft(
+        $conversation,
+        'Mensagem personalizada',
+        Message::SOURCE_TEMPLATE,
+        null,
+        $template
+    );
+
+    expect($message->template_id)->toBe($template->id)
+        ->and($message->template->name)->toBe('Primeiro contacto')
+        ->and($message->body)->toBe('Mensagem personalizada');
 });
